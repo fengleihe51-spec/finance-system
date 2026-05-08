@@ -3,2150 +3,1868 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PROJ-2026-003 财务系统 - 需求调研报告</title>
+  <title>代理记账业务智能系统建设方案</title>
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700;900&display=swap');
-
     :root {
-      --bg: #FAF3E8;
-      --bg-alt: #FFF8F0;
-      --black: #1A1A2E;
-      --pink: #FF6B9D;
-      --orange: #FFA726;
-      --blue: #42A5F5;
-      --yellow: #FFEE58;
-      --green: #66BB6A;
-      --purple: #AB47BC;
-      --teal: #26C6DA;
+      --bg: #FFFFFF; --bg-alt: #FFF5F5; --black: #000000;
+      --red: #FF1744; --yellow: #FFEA00; --blue: #2979FF;
+      --pink: #F50057; --orange: #FF6D00;
       --card: #FFFFFF;
-      --shadow: 6px 6px 0px 0px var(--black);
+      --shadow: 5px 5px 0px 0px var(--black);
       --shadow-sm: 3px 3px 0px 0px var(--black);
-      --border: 3px solid var(--black);
+      --border: 4px solid var(--black);
       --radius: 0px;
+      --font-main: "Helvetica Neue", Helvetica, "PingFang SC", "Microsoft YaHei", Arial, sans-serif;
     }
-
     * { margin: 0; padding: 0; box-sizing: border-box; }
-
     body {
-      font-family: 'Noto Sans SC', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+      font-family: var(--font-main);
       background: var(--bg);
       color: var(--black);
       overflow: hidden;
       height: 100vh;
+      width: 100vw;
     }
+    #app { display: flex; height: 100vh; width: 100vw; }
 
-    #app { display: flex; height: 100vh; }
-
-    /* Sidebar */
+    /* 侧边栏 */
     #sidebar {
       width: 300px;
-      background: var(--card);
+      background: var(--yellow);
       border-right: var(--border);
-      overflow-y: auto;
-      padding: 20px 0;
       flex-shrink: 0;
+      overflow-y: auto;
+      padding: 16px;
       transition: transform 0.3s ease;
       position: relative;
+      z-index: 100;
     }
-
-    #sidebar.hidden { transform: translateX(-100%); position: absolute; z-index: 100; }
-
-    .sidebar-header {
-      padding: 0 20px 20px;
-      border-bottom: var(--border);
-      margin-bottom: 15px;
+    #sidebar.collapsed { transform: translateX(-100%); position: absolute; }
+    #sidebar h2 {
+      font-size: 16px;
+      margin-bottom: 12px;
+      padding: 8px;
+      background: var(--red);
+      color: white;
+      border: var(--border);
+      box-shadow: var(--shadow-sm);
+      text-align: center;
     }
-
-    .sidebar-header h2 {
-      font-size: 18px;
-      font-weight: 900;
-      color: var(--pink);
-      text-transform: uppercase;
-      letter-spacing: 2px;
-    }
-
-    .sidebar-header p {
-      font-size: 12px;
-      color: var(--black);
-      opacity: 0.6;
-      margin-top: 5px;
-    }
-
     .nav-item {
       display: block;
-      padding: 10px 20px;
+      padding: 8px 10px;
+      margin-bottom: 4px;
       text-decoration: none;
       color: var(--black);
-      font-size: 14px;
-      border-left: 4px solid transparent;
-      transition: all 0.2s;
-      cursor: pointer;
-      user-select: none;
-    }
-
-    .nav-item:hover { background: var(--bg-alt); }
-    .nav-item.active { border-left-color: var(--pink); background: var(--bg-alt); font-weight: 700; }
-    .nav-item.level-1 { font-weight: 700; font-size: 15px; padding-top: 12px; }
-    .nav-item.level-2 {
-      padding-left: 36px;
       font-size: 13px;
-      display: none;
-      border-left: 4px solid var(--teal);
-    }
-
-    .nav-group.expanded .nav-item.level-2 { display: block; }
-    .nav-group.expanded .nav-toggle::after { content: '▲'; }
-
-    .nav-toggle {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      width: 20px;
-      height: 20px;
-      margin-left: 8px;
-      font-size: 10px;
-      border: 2px solid var(--black);
-      background: var(--yellow);
+      font-weight: 700;
+      border: 3px solid var(--black);
+      background: var(--card);
+      box-shadow: var(--shadow-sm);
       cursor: pointer;
+      transition: all 0.15s;
+    }
+    .nav-item:hover, .nav-item.active {
+      background: var(--blue); color: white;
+      transform: translate(-2px, -2px);
+      box-shadow: var(--shadow);
+    }
+    .nav-item.sub {
+      margin-left: 16px;
+      font-size: 12px;
+      padding: 6px 10px;
+      border-width: 2px;
+      background: var(--bg-alt);
+      display: none;
+    }
+    .nav-item.sub.visible { display: block; }
+    .nav-item.sub.active { background: var(--pink); }
+    .nav-toggle {
+      float: right;
+      font-size: 11px;
+      margin-top: 2px;
     }
 
-    .nav-toggle::after { content: '▼'; }
-
-    /* Memphis decorations */
-    .memphis-deco {
-      position: fixed;
-      pointer-events: none;
-      z-index: 50;
-    }
-
-    .deco-topleft {
-      top: 10px; left: 310px;
-      width: 60px; height: 60px;
-    }
-
-    .deco-bottomright {
-      bottom: 60px; right: 20px;
-      width: 80px; height: 80px;
-    }
-
-    /* Main */
+    /* 主区域 */
     #main {
       flex: 1;
       display: flex;
       flex-direction: column;
-      overflow: hidden;
-      position: relative;
-    }
-
-    #progressBar {
-      height: 6px;
-      background: var(--black);
-      position: relative;
-    }
-
-    #progressBar .fill {
-      height: 100%;
-      background: repeating-linear-gradient(
-        90deg,
-        var(--pink) 0px, var(--pink) 10px,
-        var(--yellow) 10px, var(--yellow) 20px,
-        var(--blue) 20px, var(--blue) 30px,
-        var(--green) 30px, var(--green) 40px
-      );
-      transition: width 0.3s ease;
-      width: 0%;
-    }
-
-    #topBar {
-      padding: 12px 24px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      background: var(--card);
-      border-bottom: var(--border);
-    }
-
-    #menuBtn {
-      background: var(--yellow);
-      border: var(--border);
-      padding: 8px 16px;
-      cursor: pointer;
-      font-size: 14px;
-      font-weight: 700;
-      font-family: inherit;
-      box-shadow: var(--shadow-sm);
-    }
-
-    #slideInfo { font-size: 13px; font-weight: 700; }
-
-    #slideContainer {
-      flex: 1;
       position: relative;
       overflow: hidden;
       background: var(--bg);
     }
+    #main::before {
+      content: "";
+      position: absolute; inset: 0;
+      background-image: radial-gradient(circle, var(--black) 1px, transparent 1px);
+      background-size: 12px 12px;
+      opacity: 0.06;
+      pointer-events: none;
+      z-index: 0;
+    }
 
+    /* 进度条 */
+    #progressBar { height: 8px; background: var(--black); position: relative; z-index: 10; }
+    #progressBar .fill { height: 100%; background: var(--red); width: 0%; transition: width 0.4s ease; }
+
+    /* 顶部工具栏 */
+    #topBar {
+      height: 48px;
+      background: var(--blue);
+      border-bottom: var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 20px;
+      z-index: 10;
+    }
+    #menuBtn {
+      background: var(--yellow);
+      border: 3px solid var(--black);
+      padding: 4px 12px;
+      font-size: 18px;
+      font-weight: bold;
+      cursor: pointer;
+      box-shadow: var(--shadow-sm);
+    }
+    #slideCounter {
+      font-weight: bold;
+      color: white;
+      font-size: 16px;
+      text-shadow: 2px 2px 0 var(--black);
+    }
+
+    /* 幻灯片 */
+    #slideContainer { flex: 1; position: relative; overflow: hidden; }
     .slide {
       position: absolute;
       top: 0; left: 0;
       width: 100%; height: 100%;
-      padding: 32px 48px;
+      padding: 36px 48px;
       overflow-y: auto;
       opacity: 0;
-      transform: translateX(40px) rotate(1deg);
-      transition: opacity 0.5s ease, transform 0.5s ease;
+      transform: translateX(60px) scale(0.96);
+      transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
       pointer-events: none;
+      z-index: 1;
     }
-
     .slide.active {
       opacity: 1;
-      transform: translateX(0) rotate(0deg);
-      pointer-events: all;
+      transform: translateX(0) scale(1);
+      pointer-events: auto;
+      z-index: 5;
     }
 
-    /* Typography */
-    h1 {
-      font-size: 38px;
+    /* 内容组件 */
+    .slide-title {
+      font-size: 36px;
       font-weight: 900;
       margin-bottom: 20px;
-      color: var(--black);
       line-height: 1.2;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-    }
-
-    h2 {
-      font-size: 26px;
-      font-weight: 900;
-      margin: 20px 0 16px;
-      color: var(--black);
-      background: var(--yellow);
+      letter-spacing: -1px;
+      position: relative;
       display: inline-block;
-      padding: 4px 16px;
-      border: var(--border);
-      box-shadow: var(--shadow-sm);
     }
-
-    h3 {
+    .slide-title::after {
+      content: "";
+      position: absolute;
+      bottom: -4px; left: 0;
+      width: 100%; height: 5px;
+      background: var(--red);
+    }
+    .slide-subtitle {
       font-size: 18px;
       font-weight: 700;
-      margin: 16px 0 10px;
-      color: var(--black);
+      color: var(--blue);
+      margin-bottom: 14px;
     }
-
-    h4 {
-      font-size: 15px;
-      font-weight: 700;
-      margin: 12px 0 8px;
-      color: var(--black);
-    }
-
-    p, li {
-      font-size: 14px;
-      line-height: 1.8;
-      margin-bottom: 8px;
-    }
-
-    ul, ol { margin-left: 20px; margin-bottom: 12px; }
-    li { margin-bottom: 6px; }
-
-    /* Cards */
     .card {
       background: var(--card);
       border: var(--border);
-      padding: 20px;
-      margin: 14px 0;
       box-shadow: var(--shadow);
-      position: relative;
+      padding: 16px;
+      margin-bottom: 12px;
     }
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
 
-    .card::before {
-      content: '';
-      position: absolute;
-      top: -12px; right: 20px;
-      width: 30px; height: 30px;
-      background: var(--pink);
-      border-radius: 50%;
-      border: var(--border);
-    }
-
-    .card:nth-child(2n)::before { background: var(--blue); }
-    .card:nth-child(3n)::before { background: var(--green); }
-    .card:nth-child(4n)::before { background: var(--orange); }
-    .card:nth-child(5n)::before { background: var(--purple); }
-
-    .card.pink-bg { background: var(--pink); color: white; }
-    .card.blue-bg { background: var(--blue); color: white; }
-    .card.yellow-bg { background: var(--yellow); }
-    .card.green-bg { background: var(--green); color: white; }
-    .card.teal-bg { background: var(--teal); }
-    .card.purple-bg { background: var(--purple); color: white; }
-    .card.orange-bg { background: var(--orange); color: white; }
-
-    /* Grids */
-    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-    .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
-    .grid-4 { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 16px; }
-
-    @media (max-width: 900px) {
-      .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr 1fr; }
-    }
-
-    @media (max-width: 600px) {
-      .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
-      .slide { padding: 20px; }
-      h1 { font-size: 26px; }
-      h2 { font-size: 18px; }
-    }
-
-    /* Tables */
-    .data-table {
-      width: 100%;
-      border-collapse: separate;
-      border-spacing: 0;
-      margin: 16px 0;
-      font-size: 13px;
-      background: var(--card);
-      border: var(--border);
-    }
-
-    .data-table th, .data-table td {
-      border: 2px solid var(--black);
-      padding: 10px 12px;
-      text-align: left;
-    }
-
-    .data-table th {
-      background: var(--black);
-      color: white;
-      font-weight: 700;
-    }
-
-    .data-table tr:nth-child(even) td { background: var(--bg-alt); }
-
-    /* Badges */
     .badge {
       display: inline-block;
       padding: 3px 10px;
-      font-size: 12px;
-      font-weight: 900;
-      border: var(--border);
-      margin-right: 8px;
-      box-shadow: var(--shadow-sm);
+      font-size: 11px;
+      font-weight: 800;
+      border: 3px solid var(--black);
+      box-shadow: 2px 2px 0 var(--black);
+      margin-right: 5px;
+      margin-bottom: 5px;
     }
-
-    .badge-pink { background: var(--pink); color: white; }
-    .badge-yellow { background: var(--yellow); }
-    .badge-green { background: var(--green); color: white; }
+    .badge-red { background: var(--red); color: white; }
+    .badge-yellow { background: var(--yellow); color: var(--black); }
     .badge-blue { background: var(--blue); color: white; }
+    .badge-pink { background: var(--pink); color: white; }
     .badge-orange { background: var(--orange); color: white; }
-    .badge-purple { background: var(--purple); color: white; }
-    .badge-teal { background: var(--teal); }
 
-    /* Highlight boxes */
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+      margin-top: 10px;
+    }
+    .data-table th {
+      background: var(--black);
+      color: white;
+      padding: 8px;
+      text-align: left;
+      border: 3px solid var(--black);
+    }
+    .data-table td {
+      padding: 8px;
+      border: 3px solid var(--black);
+      background: var(--card);
+    }
+    .data-table tr:nth-child(even) td { background: var(--bg-alt); }
+
     .highlight-box {
       background: var(--yellow);
       border: var(--border);
-      padding: 16px;
-      margin: 16px 0;
+      padding: 12px;
       font-weight: 700;
-      box-shadow: var(--shadow);
-      position: relative;
-    }
-
-    .highlight-box.pink { background: var(--pink); color: white; }
-    .highlight-box.blue { background: var(--blue); color: white; }
-    .highlight-box.green { background: var(--green); color: white; }
-
-    /* Flowchart - 明确指向 */
-    .flowchart {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 0;
-      margin: 20px 0;
-    }
-
-    .flow-row {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      flex-wrap: wrap;
-      justify-content: center;
-      position: relative;
-    }
-
-    .flow-node {
-      padding: 10px 16px;
-      border: var(--border);
-      font-size: 12px;
-      font-weight: 700;
-      text-align: center;
-      min-width: 120px;
       box-shadow: var(--shadow-sm);
-      position: relative;
-      z-index: 2;
-    }
-
-    .flow-node.start { background: var(--green); color: white; }
-    .flow-node.end { background: var(--pink); color: white; }
-    .flow-node.decision { background: var(--yellow); }
-    .flow-node.action { background: var(--card); }
-
-    /* 垂直连接线 */
-    .flow-line-down {
-      width: 4px;
-      height: 20px;
-      background: var(--black);
-      position: relative;
-      margin: 0 auto;
-    }
-    .flow-line-down::after {
-      content: '';
-      position: absolute;
-      bottom: -10px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 0;
-      height: 0;
-      border-left: 8px solid transparent;
-      border-right: 8px solid transparent;
-      border-top: 10px solid var(--black);
-    }
-
-    /* 水平箭头 */
-    .flow-arrow {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 22px;
-      font-weight: 900;
-      color: var(--black);
-    }
-
-    /* 分支容器 */
-    .flow-branch {
-      display: flex;
-      align-items: flex-start;
-      justify-content: center;
-      gap: 48px;
-      position: relative;
-      width: 100%;
-      max-width: 800px;
-      margin: 16px auto;
-      padding-top: 16px;
-    }
-    /* 顶部水平横线 */
-    .flow-branch::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 25%;
-      right: 25%;
-      height: 4px;
-      background: var(--black);
-    }
-    /* 顶部垂直连接线（从上方节点下来） */
-    .flow-branch::after {
-      content: '';
-      position: absolute;
-      top: -20px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 4px;
-      height: 20px;
-      background: var(--black);
-    }
-    /* 每个分支列 */
-    .branch-line {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 8px;
-      flex: 1;
-      max-width: 320px;
-      position: relative;
-      padding-top: 8px;
-    }
-    /* 分支列顶部垂直线（从横线下来） */
-    .branch-line::before {
-      content: '';
-      position: absolute;
-      top: -8px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 4px;
-      height: 8px;
-      background: var(--black);
-    }
-    /* 分支标签 */
-    .branch-label {
+      margin: 12px 0;
       font-size: 14px;
-      font-weight: 900;
-      padding: 5px 16px;
-      border: 3px solid var(--black);
-      background: var(--yellow);
-      box-shadow: 3px 3px 0 var(--black);
-      text-align: center;
-      white-space: nowrap;
     }
-    .branch-label.warn { background: var(--pink); color: white; }
-    .branch-label.success { background: var(--green); color: white; }
 
-    /* Cover */
-    .cover-content {
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: flex-start;
-      height: 100%;
-      padding: 40px;
+    .speech-bubble {
       position: relative;
-    }
-
-    .cover-badge {
-      font-size: 14px;
-      font-weight: 900;
-      color: var(--black);
-      background: var(--yellow);
-      border: var(--border);
-      padding: 6px 16px;
-      margin-bottom: 24px;
-      box-shadow: var(--shadow-sm);
-      text-transform: uppercase;
-      letter-spacing: 2px;
-    }
-
-    .cover-title {
-      font-size: 44px;
-      font-weight: 900;
-      line-height: 1.15;
-      margin-bottom: 16px;
-      color: var(--black);
-      text-transform: uppercase;
-    }
-
-    .cover-subtitle {
-      font-size: 18px;
-      color: var(--black);
-      opacity: 0.7;
-      margin-bottom: 40px;
-    }
-
-    .cover-meta {
-      display: flex;
-      gap: 20px;
-      flex-wrap: wrap;
-    }
-
-    .cover-meta-item {
-      border: var(--border);
-      padding: 16px 24px;
-      background: var(--card);
-      box-shadow: var(--shadow);
-    }
-
-    .cover-meta-label { font-size: 11px; font-weight: 700; opacity: 0.6; margin-bottom: 4px; text-transform: uppercase; }
-    .cover-meta-value { font-size: 22px; font-weight: 900; }
-
-    .cover-value-box {
-      border: var(--border);
-      padding: 20px 28px;
-      background: var(--yellow);
-      box-shadow: var(--shadow);
-      font-size: 16px;
-      font-weight: 800;
-      line-height: 1.6;
-      text-align: center;
-    }
-
-    /* Bottom bar */
-    #bottomBar {
-      padding: 14px 24px;
-      background: var(--card);
-      border-top: var(--border);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .nav-btn {
       background: var(--blue);
       color: white;
+      padding: 14px 18px;
       border: var(--border);
-      padding: 10px 24px;
-      cursor: pointer;
-      font-family: inherit;
-      font-size: 14px;
+      box-shadow: var(--shadow);
+      margin-bottom: 16px;
       font-weight: 700;
-      box-shadow: var(--shadow-sm);
+      font-size: 14px;
+    }
+    .speech-bubble::after {
+      content: "";
+      position: absolute;
+      bottom: -14px; left: 30px;
+      border-width: 14px 14px 0;
+      border-style: solid;
+      border-color: var(--black) transparent;
+      display: block;
+      width: 0;
+    }
+    .speech-bubble::before {
+      content: "";
+      position: absolute;
+      bottom: -9px; left: 33px;
+      border-width: 11px 11px 0;
+      border-style: solid;
+      border-color: var(--blue) transparent;
+      display: block;
+      width: 0;
+      z-index: 1;
     }
 
-    .nav-btn:hover { background: var(--purple); }
-    .nav-btn:disabled { opacity: 0.4; cursor: not-allowed; background: #ccc; }
-
-    /* Section styling */
-    .section-number {
-      font-size: 72px;
-      font-weight: 900;
-      color: var(--pink);
-      opacity: 0.25;
-      line-height: 1;
-      margin-bottom: -20px;
-    }
-
-    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-    @media (max-width: 900px) { .two-col { grid-template-columns: 1fr; } }
-
-    .pain-point { border-left: 5px solid var(--pink); padding-left: 16px; margin: 12px 0; }
-    .goal-item { border-left: 5px solid var(--green); padding-left: 16px; margin: 12px 0; }
-
-    /* Code/pre blocks */
-    pre {
-      background: var(--bg-alt);
+    .arch-diagram {
+      background: var(--card);
       border: var(--border);
+      box-shadow: var(--shadow);
       padding: 16px;
-      overflow-x: auto;
-      font-size: 12px;
-      line-height: 1.6;
       margin: 12px 0;
+      font-family: monospace;
+      font-size: 11px;
+      line-height: 1.5;
+      white-space: pre;
+      overflow-x: auto;
+    }
+
+    ul.list { margin-left: 18px; margin-top: 8px; }
+    ul.list li { margin-bottom: 6px; font-size: 13px; line-height: 1.6; }
+
+    .cover-slide {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+    }
+    .cover-slide h1 {
+      font-size: 48px;
+      font-weight: 900;
+      line-height: 1.1;
+      margin-bottom: 16px;
+      letter-spacing: -2px;
+      text-shadow: 4px 4px 0 var(--yellow);
+    }
+    .cover-slide .meta {
+      font-size: 16px;
+      font-weight: 700;
+      margin-top: 12px;
+      padding: 10px 20px;
+      background: var(--red);
+      color: white;
+      border: var(--border);
+      box-shadow: var(--shadow);
+      display: inline-block;
+    }
+    .cover-stats {
+      display: flex;
+      gap: 16px;
+      margin-top: 32px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .stat-box {
+      background: var(--card);
+      border: var(--border);
+      box-shadow: var(--shadow);
+      padding: 16px 22px;
+      text-align: center;
+    }
+    .stat-box .num { font-size: 32px; font-weight: 900; color: var(--red); display: block; }
+    .stat-box .label { font-size: 12px; font-weight: 700; margin-top: 4px; }
+
+    .toc-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      margin-top: 16px;
+    }
+    .toc-item {
+      background: var(--card);
+      border: var(--border);
+      box-shadow: var(--shadow-sm);
+      padding: 10px 12px;
+      font-size: 13px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .toc-num {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      background: var(--black);
+      color: var(--yellow);
+      font-size: 14px;
+      font-weight: 900;
+      flex-shrink: 0;
+    }
+
+    .flowchart { display: flex; flex-direction: column; align-items: center; gap: 6px; margin: 16px 0; }
+    .flow-row { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; justify-content: center; }
+    .flow-node {
+      padding: 10px 18px;
+      border: var(--border);
+      font-weight: 700;
+      text-align: center;
+      min-width: 140px;
+      font-size: 13px;
       box-shadow: var(--shadow-sm);
     }
+    .flow-start { background: #4CAF50; color: white; }
+    .flow-action { background: var(--blue); color: white; }
+    .flow-decision { background: var(--yellow); color: var(--black); }
+    .flow-end { background: var(--red); color: white; }
+    .flow-arrow { font-size: 20px; font-weight: 900; }
 
-    /* Small text */
-    .small { font-size: 12px; opacity: 0.7; }
-
-    /* Scrollbar */
-    ::-webkit-scrollbar { width: 10px; }
-    ::-webkit-scrollbar-track { background: var(--bg); border-left: var(--border); }
-    ::-webkit-scrollbar-thumb { background: var(--black); }
-    ::-webkit-scrollbar-thumb:hover { background: var(--pink); }
-
-    /* Memphis pattern bg */
-    .memphis-pattern {
-      position: absolute;
-      top: 0; right: 0;
-      width: 200px; height: 200px;
-      opacity: 0.15;
-      pointer-events: none;
+    #bottomBar {
+      height: 52px;
+      background: var(--black);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 20px;
+      z-index: 10;
     }
-
-    /* Stripes decoration */
-    .stripes {
-      background: repeating-linear-gradient(
-        45deg,
-        var(--black),
-        var(--black) 4px,
-        transparent 4px,
-        transparent 8px
-      );
+    .navBtn {
+      background: var(--yellow);
+      border: 3px solid var(--black);
+      padding: 7px 18px;
+      font-size: 13px;
+      font-weight: 800;
+      cursor: pointer;
+      box-shadow: 3px 3px 0 white;
     }
+    .navBtn:hover { background: var(--red); color: white; }
+    .navBtn:disabled { opacity: 0.4; cursor: not-allowed; }
 
-    /* Zigzag border */
-    .zigzag {
-      position: relative;
+    .metric-row { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 10px; }
+    .metric-box {
+      background: var(--card);
+      border: var(--border);
+      box-shadow: var(--shadow-sm);
+      padding: 12px 16px;
+      text-align: center;
+      min-width: 120px;
     }
-    .zigzag::after {
-      content: '';
-      position: absolute;
-      bottom: -8px; left: 0;
-      width: 100%; height: 8px;
-      background: linear-gradient(135deg, var(--pink) 8px, transparent 0) 0 0,
-                  linear-gradient(-135deg, var(--pink) 8px, transparent 0) 0 0;
-      background-size: 16px 16px;
+    .metric-box .val { font-size: 24px; font-weight: 900; color: var(--red); }
+    .metric-box .lab { font-size: 11px; font-weight: 700; margin-top: 2px; }
+
+    @media (max-width: 900px) {
+      #sidebar { position: absolute; transform: translateX(-100%); }
+      .slide { padding: 20px; }
+      .grid-2, .grid-3 { grid-template-columns: 1fr; }
+      .slide-title { font-size: 26px; }
+      .cover-slide h1 { font-size: 28px; }
+      .toc-grid { grid-template-columns: 1fr; }
+      .arch-diagram { font-size: 9px; padding: 10px; }
     }
   </style>
 </head>
 <body>
-  <!-- Memphis decorations -->
-  <svg class="memphis-deco deco-topleft" viewBox="0 0 60 60">
-    <circle cx="30" cy="30" r="25" fill="none" stroke="#1A1A2E" stroke-width="3"/>
-    <circle cx="30" cy="30" r="10" fill="#FF6B9D"/>
-    <rect x="5" y="5" width="8" height="8" fill="#42A5F5"/>
-    <rect x="47" y="47" width="8" height="8" fill="#FFEE58"/>
-  </svg>
+<div id="app">
+  <nav id="sidebar">
+    <h2>目录导航</h2>
+    <a class="nav-item active" data-idx="0">封面</a>
+    <a class="nav-item" data-idx="1">目录</a>
+    <a class="nav-item" data-idx="2">项目背景</a>
+    <a class="nav-item has-children" data-idx="3" data-group="competitor">竞品分析 <span class="nav-toggle">▼</span></a>
+    <a class="nav-item sub" data-idx="3" data-group="competitor">竞品分析 · 总览</a>
+    <a class="nav-item sub" data-idx="4" data-group="competitor">系统定位</a>
+    <a class="nav-item sub" data-idx="5" data-group="competitor">核心功能</a>
+    <a class="nav-item sub" data-idx="6" data-group="competitor">核心价值</a>
+    <a class="nav-item sub" data-idx="7" data-group="competitor">技术与AI落地</a>
+    <a class="nav-item sub" data-idx="8" data-group="competitor">商业模式</a>
+    <a class="nav-item sub" data-idx="9" data-group="competitor">竞争格局</a>
+    <a class="nav-item" data-idx="10">痛点分析</a>
+    <a class="nav-item has-children" data-idx="11" data-group="build">建设内容 <span class="nav-toggle">▼</span></a>
+    <a class="nav-item sub" data-idx="11" data-group="build">建设内容 · 总览</a>
+    <a class="nav-item sub" data-idx="12" data-group="build">收资料环节</a>
+    <a class="nav-item sub" data-idx="13" data-group="build">账务处理环节</a>
+    <a class="nav-item sub" data-idx="14" data-group="build">开发票环节</a>
+    <a class="nav-item sub" data-idx="15" data-group="build">税务申报环节</a>
+    <a class="nav-item sub" data-idx="16" data-group="build">凭证处理环节</a>
+    <a class="nav-item sub" data-idx="17" data-group="build">经营分析报告</a>
+    <a class="nav-item sub" data-idx="18" data-group="build">风险预警系统</a>
+    <a class="nav-item sub" data-idx="19" data-group="build">AI智能体集成</a>
+    <a class="nav-item has-children" data-idx="20" data-group="research">调研分析 <span class="nav-toggle">▼</span></a>
+    <a class="nav-item sub" data-idx="20" data-group="research">收资料环节</a>
+    <a class="nav-item sub" data-idx="21" data-group="research">账务处理环节</a>
+    <a class="nav-item sub" data-idx="22" data-group="research">开发票环节</a>
+    <a class="nav-item sub" data-idx="23" data-group="research">税务申报环节</a>
+    <a class="nav-item sub" data-idx="24" data-group="research">凭证处理环节</a>
+    <a class="nav-item sub" data-idx="25" data-group="research">经营分析报告</a>
+    <a class="nav-item sub" data-idx="26" data-group="research">风险预警系统</a>
+    <a class="nav-item has-children" data-idx="27" data-group="arch">系统架构 <span class="nav-toggle">▼</span></a>
+    <a class="nav-item sub" data-idx="27" data-group="arch">功能架构图</a>
+    <a class="nav-item sub" data-idx="28" data-group="arch">业务架构图</a>
+    <a class="nav-item sub" data-idx="29" data-group="arch">功能清单</a>
+    <a class="nav-item has-children" data-idx="30" data-group="ai">AI维度深化分析 <span class="nav-toggle">▼</span></a>
+    <a class="nav-item sub" data-idx="30" data-group="ai">AI维度 · 总览</a>
+    <a class="nav-item sub" data-idx="31" data-group="ai">AI成本结转</a>
+    <a class="nav-item sub" data-idx="32" data-group="ai">科目辅助推荐</a>
+    <a class="nav-item sub" data-idx="33" data-group="ai">AI智能体</a>
+    <a class="nav-item sub" data-idx="34" data-group="ai">7×24h风险扫描</a>
+    <a class="nav-item sub" data-idx="35" data-group="ai">财税垂类大模型</a>
+    <a class="nav-item sub" data-idx="36" data-group="ai">端到端流程自动化</a>
+    <a class="nav-item" data-idx="37">建设难度</a>
+    <a class="nav-item has-children" data-idx="38" data-group="tax">税务相关准备工作 <span class="nav-toggle">▼</span></a>
+    <a class="nav-item sub" data-idx="38" data-group="tax">税务准备 · 总览</a>
+    <a class="nav-item sub" data-idx="39" data-group="tax">业务层面准备</a>
+    <a class="nav-item sub" data-idx="40" data-group="tax">技术对接准备</a>
+    <a class="nav-item sub" data-idx="41" data-group="tax">合规与安全</a>
+    <a class="nav-item" data-idx="42">进一步沟通事项</a>
+    <a class="nav-item" data-idx="43">下一步准备工作</a>
+  </nav>
 
-  <svg class="memphis-deco deco-bottomright" viewBox="0 0 80 80">
-    <polygon points="40,5 75,70 5,70" fill="none" stroke="#1A1A2E" stroke-width="3"/>
-    <circle cx="40" cy="45" r="12" fill="#AB47BC"/>
-    <rect x="10" y="10" width="10" height="10" fill="#FFA726"/>
-    <circle cx="70" cy="20" r="6" fill="#26C6DA"/>
-    <path d="M10,60 Q20,50 30,60 T50,60" fill="none" stroke="#1A1A2E" stroke-width="3"/>
-  </svg>
+  <div id="main">
+    <div id="progressBar"><div class="fill" id="progressFill"></div></div>
+    <div id="topBar">
+      <button id="menuBtn">&#9776;</button>
+      <span id="slideCounter">1 / 44</span>
+      <span></span>
+    </div>
 
-  <div id="app">
-    <!-- Sidebar -->
-    <nav id="sidebar">
-      <div class="sidebar-header">
-        <h2>PROJ-2026-003</h2>
-        <p>财务系统需求调研报告</p>
+    <div id="slideContainer">
+      <!-- ===== 第0页：封面 ===== -->
+      <div class="slide active cover-slide">
+        <div class="badge badge-red" style="font-size:16px; padding:8px 20px; margin-bottom:16px;">PROJ-2026-003</div>
+        <h1>代理记账业务<br>智能系统建设方案</h1>
+        <div style="font-size:18px; font-weight:700; margin-bottom:6px;">基于慧算账产品能力输出</div>
+        <div class="meta">2026年5月8日</div>
+        <div class="cover-stats">
+          <div class="stat-box"><span class="num">10+</span><span class="label">核心模块</span></div>
+          <div class="stat-box"><span class="num">100+</span><span class="label">风险点位</span></div>
+          <div class="stat-box"><span class="num">50%</span><span class="label">人效提升</span></div>
+          <div class="stat-box"><span class="num">98%</span><span class="label">OCR准确率</span></div>
+        </div>
       </div>
 
-      <div class="nav-group" data-group="cover">
-        <a href="#" class="nav-item level-1" data-slide="0">封面</a>
+      <!-- ===== 第1页：目录 ===== -->
+      <div class="slide">
+        <div class="slide-title">目录</div>
+        <div class="toc-grid">
+          <div class="toc-item"><span class="toc-num">01</span>项目背景</div>
+          <div class="toc-item"><span class="toc-num">02</span>竞品分析</div>
+          <div class="toc-item"><span class="toc-num">03</span>痛点分析</div>
+          <div class="toc-item"><span class="toc-num">04</span>建设内容</div>
+          <div class="toc-item"><span class="toc-num">05</span>调研分析</div>
+          <div class="toc-item"><span class="toc-num">06</span>系统架构</div>
+          <div class="toc-item"><span class="toc-num">07</span>AI维度深化分析</div>
+          <div class="toc-item"><span class="toc-num">08</span>建设难度</div>
+          <div class="toc-item"><span class="toc-num">09</span>税务相关准备工作</div>
+          <div class="toc-item"><span class="toc-num">10</span>进一步沟通事项</div>
+          <div class="toc-item"><span class="toc-num">11</span>下一步准备工作</div>
+        </div>
+        <div class="speech-bubble" style="margin-top:20px; background:var(--pink);">
+          本方案覆盖从票据采集到智能申报的全链路闭环，核心目标是通过AI能力替代标准化流程、压缩非标场景处理时间。
+        </div>
       </div>
 
-      <div class="nav-group" data-group="toc">
-        <a href="#" class="nav-item level-1" data-slide="1">目录</a>
-      </div>
-
-      <div class="nav-group" data-group="ch1">
-        <a href="#" class="nav-item level-1" data-slide="2">一、项目背景</a>
-      </div>
-
-      <div class="nav-group" data-group="ch2">
-        <a href="#" class="nav-item level-1" data-slide="3">二、核心痛点总结</a>
-      </div>
-
-      <div class="nav-group" data-group="ch3">
-        <a href="#" class="nav-item level-1" data-slide="4">三、解决目标</a>
-      </div>
-
-      <div class="nav-group" data-group="ch4">
-        <a href="#" class="nav-item level-1" data-slide="5">四、核心功能清单</a>
-      </div>
-
-       <div class="nav-group" data-group="ch5">
-         <a href="#" class="nav-item level-1 has-children" data-slide="6">
-           六、系统架构
-           <span class="nav-toggle"></span>
-         </a>
-         <a href="#" class="nav-item level-2" data-slide="6">6.1 产品架构</a>
-         <a href="#" class="nav-item level-2" data-slide="7">6.2 数据流向</a>
-       </div>
-
-       <div class="nav-group" data-group="ch6">
-         <a href="#" class="nav-item level-1 has-children" data-slide="8">
-           七、功能数量与调研方向
-           <span class="nav-toggle"></span>
-         </a>
-         <a href="#" class="nav-item level-2" data-slide="8">7.1 收资料环节</a>
-         <a href="#" class="nav-item level-2" data-slide="8">7.2 账务处理环节</a>
-         <a href="#" class="nav-item level-2" data-slide="9">7.3 开发票环节</a>
-         <a href="#" class="nav-item level-2" data-slide="10">7.4 税务申报环节</a>
-         <a href="#" class="nav-item level-2" data-slide="11">7.5 凭证处理环节</a>
-         <a href="#" class="nav-item level-2" data-slide="12">7.6 经营分析报告</a>
-         <a href="#" class="nav-item level-2" data-slide="13">7.7 风险预警系统</a>
-       </div>
-
-       <div class="nav-group" data-group="ch7">
-         <a href="#" class="nav-item level-1" data-slide="14">八、当前存在问题</a>
-       </div>
-
-       <div class="nav-group" data-group="ch8">
-         <a href="#" class="nav-item level-1 has-children" data-slide="15">
-           九、AI维度深化分析
-           <span class="nav-toggle"></span>
-         </a>
-         <a href="#" class="nav-item level-2" data-slide="15">9.1 整体AI架构设计</a>
-         <a href="#" class="nav-item level-2" data-slide="16">9.2 多智能体架构</a>
-         <a href="#" class="nav-item level-2" data-slide="17">9.3 LLM选型与训练</a>
-         <a href="#" class="nav-item level-2" data-slide="18">9.4 OCR与文档智能</a>
-         <a href="#" class="nav-item level-2" data-slide="19">9.5 核心AI模块</a>
-         <a href="#" class="nav-item level-2" data-slide="20">9.6 数据安全</a>
-         <a href="#" class="nav-item level-2" data-slide="21">9.7 人机协作</a>
-         <a href="#" class="nav-item level-2" data-slide="22">9.8 评估指标</a>
-         <a href="#" class="nav-item level-2" data-slide="23">9.9 算力与成本</a>
-         <a href="#" class="nav-item level-2" data-slide="24">9.10 实施路线图</a>
-         <a href="#" class="nav-item level-2" data-slide="25">9.11 关键风险</a>
-       </div>
-
-       <div class="nav-group" data-group="ch9">
-         <a href="#" class="nav-item level-1" data-slide="26">十、总结</a>
-       </div>
-    </nav>
-
-    <!-- Main -->
-    <div id="main">
-      <div id="progressBar"><div class="fill" id="progressFill"></div></div>
-      <div id="topBar">
-        <button id="menuBtn">&#x2261; 目录</button>
-        <span id="slideInfo">1 / 28</span>
-      </div>
-
-      <div id="slideContainer">
-
-        <!-- Slide 0: Cover -->
-        <div class="slide active" data-index="0">
-          <div class="cover-content">
-            <div class="cover-badge">需求调研报告</div>
-            <div class="cover-title">财务代账作业平台<br>智能化系统建设方案</div>
-            <div class="cover-subtitle">PROJ-2026-003 &middot; 2026年5月</div>
-            <div class="cover-meta">
-              <div class="cover-value-box">
-                AI识别 + 自动账务 + 批量申报 + 风险预警<br>实现从"人工作业"向"智能体驱动"的转型升级
-              </div>
+      <!-- ===== 第2页：项目背景 ===== -->
+      <div class="slide">
+        <div class="slide-title">项目背景</div>
+        <div class="grid-2">
+          <div>
+            <div class="card">
+              <div style="font-size:16px; font-weight:800; margin-bottom:8px; color:var(--red);">政策驱动</div>
+              <p style="font-size:13px; line-height:1.6;">金税四期全面铺开，税务管理从"票据主导"转向"数据驱动"，中小微企业面临更严格的账务规范与税务稽查。</p>
             </div>
-            <div style="margin-top:40px;font-size:12px;opacity:0.5;">
-              客户：全国知名代理记账会计服务机构
+            <div class="card">
+              <div style="font-size:16px; font-weight:800; margin-bottom:8px; color:var(--blue);">行业痛点</div>
+              <p style="font-size:13px; line-height:1.6;">传统代理记账依赖大量人工操作，效率、准确率、服务成本均存在明显瓶颈，难以满足监管要求和客户专业化需求。</p>
+            </div>
+          </div>
+          <div>
+            <div class="card">
+              <div style="font-size:16px; font-weight:800; margin-bottom:8px; color:var(--orange);">技术机遇</div>
+              <p style="font-size:13px; line-height:1.6;">AI+OCR+RPA技术成熟，使财税全流程自动化成为可能。慧算账等头部企业已实现70%标准化工作由系统完成。</p>
+            </div>
+            <div class="card">
+              <div style="font-size:16px; font-weight:800; margin-bottom:8px; color:var(--pink);">建设目标</div>
+              <p style="font-size:13px; line-height:1.6;">构建"AI识别+自动账务+批量申报+风险预警"的半自动化财务处理平台，核心在于替代人工、提升代账公司工作效率。</p>
             </div>
           </div>
         </div>
+        <div class="highlight-box" style="background:var(--blue); color:white;">
+          客户需要的不是简单记账工具，而是覆盖票据采集、智能核算、自动申报、风险预警、档案管理的闭环智能体系。
+        </div>
+      </div>
 
-        <!-- Slide 1: TOC -->
-        <div class="slide" data-index="1">
-          <h1 style="font-size:32px;">目录</h1>
-          <div class="grid-3">
-            <div class="card pink-bg">
-              <h3>一、项目背景</h3>
-              <p class="small">客户简介与建设目标</p>
-            </div>
-            <div class="card blue-bg">
-              <h3>二、核心痛点总结</h3>
-              <p class="small">四大类痛点分析</p>
-            </div>
-            <div class="card yellow-bg">
-              <h3>三、解决目标</h3>
-              <p class="small">五大建设目标</p>
-            </div>
-            <div class="card green-bg">
-              <h3>四、核心功能清单</h3>
-              <p class="small">8大模块功能矩阵</p>
-            </div>
-            <div class="card purple-bg">
-              <h3>五、系统架构</h3>
-              <p class="small">产品架构与数据流向</p>
-            </div>
-            <div class="card teal-bg">
-              <h3>六、功能数量与调研方向</h3>
-              <p class="small">7个环节分环节分析</p>
-            </div>
-            <div class="card pink-bg">
-              <h3>七、当前存在问题</h3>
-              <p class="small">11项待确认问题</p>
-            </div>
-            <div class="card orange-bg">
-              <h3>八、AI维度深化分析</h3>
-              <p class="small">11个子章节深度分析</p>
-            </div>
-            <div class="card blue-bg">
-              <h3>九、总结</h3>
-              <p class="small">AI不是银弹，是杠杆</p>
-            </div>
+      <!-- ===== 第3页：竞品分析-总览 ===== -->
+      <div class="slide">
+        <div class="slide-title">竞品分析</div>
+        <div class="slide-subtitle">以慧算账为标杆进行对标分析</div>
+        <div class="grid-2">
+          <div class="card">
+            <div class="badge badge-red">系统定位</div>
+            <p style="margin-top:8px; font-size:13px; line-height:1.6;">中国最大的中小微企业财税解决方案提供商（2021-2023年总收入计，市场份额0.5%，为第二大竞争对手近五倍）。核心产品为基于SaaS的智能财税系统SATP。</p>
+          </div>
+          <div class="card">
+            <div class="badge badge-blue">核心功能</div>
+            <p style="margin-top:8px; font-size:13px; line-height:1.6;">SATP智能财税系统，融合OCR、ML、RPA及NLP技术，覆盖票据采集、智能核算、自动申报、风险预警、档案管理全流程。</p>
+          </div>
+          <div class="card">
+            <div class="badge badge-yellow">核心价值</div>
+            <p style="margin-top:8px; font-size:13px; line-height:1.6;">单名会计服务客户数从200-300家提升至400-500家，效率提升超50%；AI承担约70%标准化重复性工作；自动交付率达80%。</p>
+          </div>
+          <div class="card">
+            <div class="badge badge-pink">技术与AI落地</div>
+            <p style="margin-top:8px; font-size:13px; line-height:1.6;">2026年深度集成腾讯云ClawPro AI智能体，配备"龙虾助理"；凭证规则引擎+ML模型+2.62亿+多维参数集。</p>
           </div>
         </div>
+        <div class="card" style="background:var(--yellow);">
+          <div class="badge badge-orange">商业模式</div>
+          <p style="margin-top:8px; font-size:13px; line-height:1.6;">SaaS多租户订阅制：基础版/标准版/一般纳税人版/建安专项版，按套餐收费+增值服务付费。</p>
+        </div>
+      </div>
 
-        <!-- Slide 2: Project Background -->
-        <div class="slide" data-index="2">
-          <div class="section-number">01</div>
-          <h2>项目背景</h2>
-          <div class="card pink-bg">
-            <h3>客户定位</h3>
-            <p>全国知名的<strong>代理记账会计服务机构</strong>，服务对象主要为<strong>生产制造、商贸等中小型企业</strong>。</p>
+      <!-- ===== 第4页：竞品分析-系统定位 ===== -->
+      <div class="slide">
+        <div class="slide-title">竞品分析 · 系统定位</div>
+        <div class="slide-subtitle">SATP智能财税系统——慧算账的技术底座</div>
+        <div class="card">
+          <div class="badge badge-red">市场地位</div>
+          <p style="margin-top:10px; font-size:14px; line-height:1.7;">中国中小微企业财税解决方案提供商第一名（按2021-2023年总收入计）。市场份额0.5%，已是第二大竞争对手的近五倍，折射出行业集中度极低的格局下慧算账的技术平台与规模优势。</p>
+        </div>
+        <div class="grid-2">
+          <div class="card">
+            <div class="badge badge-blue">技术底座</div>
+            <p style="margin-top:8px; font-size:13px; line-height:1.6;">核心产品为基于SaaS的智能财税系统SATP，是其所有服务的技术底座。整合机器学习功能的AI赋能系统，融合OCR、ML、RPA及NLP等多项前沿技术。</p>
           </div>
-          <div class="card blue-bg">
-            <h3>当前业务模式</h3>
-            <p>核心业务流程涵盖：</p>
-            <ul>
-              <li>客户资料收集</li>
-              <li>账务处理</li>
-              <li>税务申报</li>
-              <li>凭证管理</li>
-              <li>报表分析</li>
+          <div class="card">
+            <div class="badge badge-yellow">适配能力</div>
+            <p style="margin-top:8px; font-size:13px; line-height:1.6;">广泛而多样化的模型参数使其能够根据不同企业类型自动适配财税处理规则。依托SATP系统，提供智能核算引擎、自动化功能、管理会计服务、数据安全及系统保护、可扩展性及适应性等多种能力。</p>
+          </div>
+        </div>
+        <div class="highlight-box">
+          SATP系统代表了财税服务行业数字化转型的方向，通过SaaS+AI的技术路线实现了边际成本递减和效率递增。
+        </div>
+      </div>
+
+      <!-- ===== 第5页：竞品分析-核心功能 ===== -->
+      <div class="slide">
+        <div class="slide-title">竞品分析 · 核心功能</div>
+        <div class="slide-subtitle">全流程自动化财税处理 + AI财税智能体</div>
+        <div class="grid-2">
+          <div class="card">
+            <div class="badge badge-red">凭证自动化处理</div>
+            <p style="margin-top:6px; font-size:12px; line-height:1.5;">平台依据场景化智能业务逻辑，内设凭证规则引擎，对不同类型、不同规模的企业科目设置、凭证等进行自动化处理，实现系统自动做账。</p>
+          </div>
+          <div class="card">
+            <div class="badge badge-blue">远程数据自动提取</div>
+            <p style="margin-top:6px; font-size:12px; line-height:1.5;">系统每月自动提取进销项发票、银行回单信息，自动识别业务类型并智能入账生成凭证。</p>
+          </div>
+          <div class="card">
+            <div class="badge badge-yellow">OCR智能识别</div>
+            <p style="margin-top:6px; font-size:12px; line-height:1.5;">通过自主研发的OCR技术，自动识别银行回单、各类费用小票并完成入账匹配。</p>
+          </div>
+          <div class="card">
+            <div class="badge badge-pink">全税种一键申报</div>
+            <p style="margin-top:6px; font-size:12px; line-height:1.5;">内置规则引擎，自动获取企业税种、税率核定信息，通过身份验证、数据加密、安全传输、逻辑校验等手段对接各地申报系统，支持多客户批量申报。</p>
+          </div>
+          <div class="card">
+            <div class="badge badge-orange">结账智能核查</div>
+            <p style="margin-top:6px; font-size:12px; line-height:1.5;">账务完整性检查、余额异常检查、往来账龄分析、业务关联性检查、关键指标检查等项目，保障账务准确率。</p>
+          </div>
+          <div class="card">
+            <div class="badge badge-red">数电发票管理</div>
+            <p style="margin-top:6px; font-size:12px; line-height:1.5;">提供开票、用票、管票一站式平台，支持多方式快捷开票，通过智能精准赋码、进销项关联、账税联动进行开票合规性预判。</p>
+          </div>
+        </div>
+        <div class="card" style="background:var(--blue); color:white;">
+          <div class="badge badge-yellow">工商税务一体化</div>
+          <p style="margin-top:6px; font-size:12px; line-height:1.5;">与税局系统、银行系统实现关联，自动获取企业变更信息、年报信息及经营异常信息，方便服务机构及时应对。</p>
+        </div>
+      </div>
+
+      <!-- ===== 第6页：竞品分析-核心价值 ===== -->
+      <div class="slide">
+        <div class="slide-title">竞品分析 · 核心价值</div>
+        <div class="grid-2">
+          <div class="card" style="border-left:8px solid var(--red);">
+            <div style="font-size:16px; font-weight:900; margin-bottom:8px;">降本增效</div>
+            <div class="metric-row">
+              <div class="metric-box"><div class="val">807元</div><div class="lab">慧算账年交付成本</div></div>
+              <div class="metric-box"><div class="val">2550元</div><div class="lab">传统方案年成本</div></div>
+            </div>
+            <p style="margin-top:8px; font-size:12px; line-height:1.5;">成本降低约60%。每名会计从管理约300家提升至400-500家，效率提升超50%。自动交付率达约80%。</p>
+          </div>
+          <div class="card" style="border-left:8px solid var(--blue);">
+            <div style="font-size:16px; font-weight:900; margin-bottom:8px;">合规护航</div>
+            <p style="font-size:13px; line-height:1.6;">通过动态财税知识图谱与全国政策库，实时跟踪各地最新财税法规变化，自动匹配行业合规标准，并通过AI风险扫描技术实现7×24小时在线预警，有效规避漏报、错报及违规风险。</p>
+          </div>
+          <div class="card" style="border-left:8px solid var(--yellow);">
+            <div style="font-size:16px; font-weight:900; margin-bottom:8px;">价值延伸</div>
+            <p style="font-size:13px; line-height:1.6;">从传统"财税服务商"向"财税军师"进化。AI承担标准化重复性工作，资深财税专家聚焦于企业经营分析、战略规划、财税合规咨询、业财融合等更高价值服务领域，提供一户一式定制方案。</p>
+          </div>
+          <div class="card" style="border-left:8px solid var(--pink);">
+            <div style="font-size:16px; font-weight:900; margin-bottom:8px;">行业标杆</div>
+            <p style="font-size:13px; line-height:1.6;">通过SaaS+AI的技术路线实现了边际成本递减和效率递增。在高度分散的市场中占据行业第一的地位，为整个代理记账行业从劳动密集型向技术驱动型转型提供了可复制、可验证的路径参考。</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== 第7页：竞品分析-技术与AI落地 ===== -->
+      <div class="slide">
+        <div class="slide-title">竞品分析 · 技术与AI落地</div>
+        <div class="slide-subtitle">从"流程自动化"到"决策智能化"</div>
+        <div class="card">
+          <div class="badge badge-blue">技术路线演进</div>
+          <p style="margin-top:8px; font-size:13px; line-height:1.6;">以自研SATP系统为底层，逐步融合OCR、RPA、ML及NLP等多项技术。核心差异在于自研财税垂直大模型，通过对海量财税政策文件、实务案例的深度学习，形成具备行业适配性的智能引擎。</p>
+        </div>
+        <div class="grid-2">
+          <div class="card">
+            <div class="badge badge-red">"龙虾助理"</div>
+            <p style="margin-top:6px; font-size:12px; line-height:1.5;">2026年4月与腾讯云ClawPro深度合作，将企业级AI智能体嵌入企业微信侧边栏。会计无需离开聊天窗口即可一键完成社保查询、发票查验、账务调整、税务报表生成、批量化报税等操作。</p>
+          </div>
+          <div class="card">
+            <div class="badge badge-yellow">70% vs 30%</div>
+            <p style="margin-top:6px; font-size:12px; line-height:1.5;">标准化财税流程中约70%已实现自动化，但剩余30%的非标场景消耗了会计90%的工作量。"龙虾"的逻辑是让AI接管检索、核算和初步处理，会计转变为意图理解和复杂问题裁决的"哨兵"。</p>
+          </div>
+        </div>
+        <div class="card" style="background:var(--yellow);">
+          <div class="badge badge-pink">研发投入收缩风险</div>
+          <p style="margin-top:6px; font-size:12px; line-height:1.5;">2022-2024年研发投入占收入比重已由14%下降。转向大模型外部接入的策略固然短期降本，但也可能削弱对增值税法、金税四期新增政策维度的反应速度。在代账行业政策敏感度极高的背景下，技术自研能力的下滑可能成为长期隐忧。</p>
+        </div>
+      </div>
+
+      <!-- ===== 第8页：竞品分析-商业模式 ===== -->
+      <div class="slide">
+        <div class="slide-title">竞品分析 · 商业模式</div>
+        <div class="slide-subtitle">SaaS为表的"规模经济"困局</div>
+        <div class="grid-2">
+          <div class="card">
+            <div class="badge badge-red">收入结构</div>
+            <p style="margin-top:8px; font-size:13px; line-height:1.6;">核心SaaS客户数三年连续下降（21.19万家→21.12万家→20.18万家）。2024年综合营收复合增长率仅为3.36%，增速呈断崖式下滑。ARPU是唯一的正向驱动力，企业战略已从"扩规模"向"挖存量"转变。</p>
+          </div>
+          <div class="card">
+            <div class="badge badge-blue">成本结构</div>
+            <p style="margin-top:8px; font-size:13px; line-height:1.6;">每名客户交付人力成本从2022年888元降至2024年738元，毛利率由53.6%升至63.1%。但销售费用超过毛利，获客效率和复购转化尚未形成正循环，仍处在依靠补贴与推广支撑规模的阶段。</p>
+          </div>
+          <div class="card">
+            <div class="badge badge-yellow">直营与授权</div>
+            <p style="margin-top:8px; font-size:13px; line-height:1.6;">直营与授权并行合作的基本盘稳固，但客户留存率波动较大（85.2%→79.4%→80%），高于行业平均60-70%，但近年下滑仍未修复。授权模式较为成熟稳定，但没有直营业务的直接客户深度黏性。</p>
+          </div>
+          <div class="card">
+            <div class="badge badge-pink">SaaS套餐</div>
+            <p style="margin-top:8px; font-size:13px; line-height:1.6;">基础版/标准版/一般纳税人版/建安专项版等多版本套餐收费模式，通过升级"进阶解决方案"对冲客户流失，但本质上是对续费率和客户黏性的双重考验。</p>
+          </div>
+        </div>
+        <div class="highlight-box" style="background:var(--pink); color:white;">
+          账报税低至500元/年的恶性低价竞争让慧算账被迫持续降低起算单价，进而挤压利润。与大模型厂商的合作本身也是双刃剑，若行业普遍接入后技术不再构成壁垒，则最终比拼的是定价、规模、数据闭环。
+        </div>
+      </div>
+
+      <!-- ===== 第9页：竞品分析-竞争格局 ===== -->
+      <div class="slide">
+        <div class="slide-title">竞品分析 · 竞争格局</div>
+        <div class="slide-subtitle">行业第一的"0.5%光环"</div>
+        <div class="card">
+          <div class="badge badge-red">高度零散的市场</div>
+          <p style="margin-top:8px; font-size:14px; line-height:1.6;">中国中小微企业财税市场规模超过2000亿元，客户超6000万户中小企业的60%依赖外部财税服务。代账机构多则数十万家免费或低价抢客，排名第一的慧算账仅占0.5%，前五大市占率合计不足1%。</p>
+        </div>
+        <div class="grid-2">
+          <div class="card">
+            <div class="badge badge-blue">价格战困境</div>
+            <p style="margin-top:6px; font-size:12px; line-height:1.5;">账报税低至500元/年的报价在市场上普遍存在，恶性低价竞争让慧算账在守住"AI+标准化"核心价值的同时，被迫持续降低起算单价，进而挤压利润。</p>
+          </div>
+          <div class="card">
+            <div class="badge badge-yellow">技术壁垒弱化</div>
+            <p style="margin-top:6px; font-size:12px; line-height:1.5;">若行业普遍接入大模型后技术本身不再构成壁垒，则最终比拼的是定价、规模、数据闭环，慧算账的差异化将进一步弱化。</p>
+          </div>
+          <div class="card">
+            <div class="badge badge-pink">资本端认可</div>
+            <p style="margin-top:6px; font-size:12px; line-height:1.5;">百望股份2024年已率先在港股成功上市，行业认可度开始回升。但谁能在金税四期后更精准地帮助中小微企业快速合规和避税，将成为核心决胜逻辑。</p>
+          </div>
+          <div class="card">
+            <div class="badge badge-orange">同业对标</div>
+            <p style="margin-top:6px; font-size:12px; line-height:1.5;">竞品如云账房等同样强化了知识图谱与政策迭代能力，行业在加快内卷。慧算账的知识图谱与政策迭代承诺是一个卖点，但差异化优势正在缩小。</p>
+          </div>
+        </div>
+        <div class="highlight-box">
+          2000亿市场池虽庞大，但极度零散的行业意味着慧算账并无排他性竞争优势，极易遭遇区域性代账机构的低价拦截。
+        </div>
+      </div>
+
+      <!-- ===== 第10页：痛点分析 ===== -->
+      <div class="slide">
+        <div class="slide-title">痛点分析</div>
+        <table class="data-table">
+          <thead><tr><th style="width:16%;">工作环节</th><th>核心痛点</th><th style="width:10%;">影响</th></tr></thead>
+          <tbody>
+            <tr><td><strong>收资料</strong><br><small>人效~20%</small></td><td>承兑票据需手动录入，工作量大、易出错、难归档</td><td><span class="badge badge-red">高</span></td></tr>
+            <tr><td><strong>账务处理</strong><br><small>人效~50%</small></td><td>成本结转工作量大；高度依赖会计专业水平，科目归属标准不统一；缺乏异常预警；人工主导效率低</td><td><span class="badge badge-red">很高</span></td></tr>
+            <tr><td><strong>开发票</strong></td><td>需手动登录电子税务局，操作繁琐、耗时久、易出错</td><td><span class="badge badge-yellow">中</span></td></tr>
+            <tr><td><strong>税务申报</strong></td><td>人工逐户申报，重复操作多、效率低；缺乏申报前审核机制</td><td><span class="badge badge-red">高</span></td></tr>
+            <tr><td><strong>凭证处理</strong><br><small>人效~20%</small></td><td>全程人工操作，耗时久、成本高；纸质凭证不易归档</td><td><span class="badge badge-yellow">中</span></td></tr>
+            <tr><td><strong>经营分析</strong></td><td>依赖会计个人经验，报告质量参差不齐</td><td><span class="badge badge-yellow">中</span></td></tr>
+            <tr><td><strong>风险预警</strong></td><td>无专门预警机制，难以提前发现财务及经营潜在问题</td><td><span class="badge badge-red">高</span></td></tr>
+          </tbody>
+        </table>
+        <div class="highlight-box" style="background:var(--pink); color:white;">
+          四大核心矛盾：人工依赖度高、专业门槛高、风险管控薄弱、系统协同性差。真正卡住效率的是30%的非标场景，却消耗了90%以上工作量。
+        </div>
+      </div>
+
+      <!-- ===== 第11页：建设内容-总览 ===== -->
+      <div class="slide">
+        <div class="slide-title">建设内容 · 总览</div>
+        <div class="grid-2">
+          <div class="card"><div class="badge badge-blue">01 收资料</div><div style="font-size:12px; margin-top:6px; line-height:1.5;">OCR智能识别（准确率98%+）+ 承兑票据专项识别 + 银行流水RPA自动采集 + 多格式批量上传</div></div>
+          <div class="card"><div class="badge badge-red">02 账务处理（核心）</div><div style="font-size:12px; margin-top:6px; line-height:1.5;">AI成本结转模块 + 会计科目辅助推荐 + 结账智能检查 + 凭证规则引擎自动做账 + ML模型支持</div></div>
+          <div class="card"><div class="badge badge-yellow">03 开发票</div><div style="font-size:12px; margin-top:6px; line-height:1.5;">电子税局对接 + 智能精准赋码 + 进销项关联 + 账税联动 + 开票合规性预判</div></div>
+          <div class="card"><div class="badge badge-pink">04 税务申报</div><div style="font-size:12px; margin-top:6px; line-height:1.5;">全税种一键申报 + 批量申报任务 + 申报前智能审核 + 汇算清缴自动化</div></div>
+          <div class="card"><div class="badge badge-orange">05 凭证处理</div><div style="font-size:12px; margin-top:6px; line-height:1.5;">电子凭证自动生成 + 多客户一键批量打印 + 在线电子归档 + 审计追溯</div></div>
+          <div class="card"><div class="badge badge-blue">06 经营分析</div><div style="font-size:12px; margin-top:6px; line-height:1.5;">多维度分析（营收/成本/现金流/税负）+ 报告自动生成 + 一户一策定制化</div></div>
+          <div class="card"><div class="badge badge-red">07 风险预警</div><div style="font-size:12px; margin-top:6px; line-height:1.5;">100+风险点位 + 动态财税知识图谱 + 7×24h AI风险扫描 + 主动预警</div></div>
+          <div class="card"><div class="badge badge-yellow">08 AI智能体</div><div style="font-size:12px; margin-top:6px; line-height:1.5;">企微侧边栏嵌入 + 一键批量操作 + 跨环节流程自动化 + Token消耗精细化管理</div></div>
+        </div>
+      </div>
+
+      <!-- ===== 第12页：建设内容-收资料 ===== -->
+      <div class="slide">
+        <div class="slide-title">建设内容 · 收资料环节</div>
+        <div class="slide-subtitle">智能化票据采集与识别——以OCR识别+RPA自动化为核心</div>
+        <div class="grid-2">
+          <div class="card">
+            <div class="badge badge-red">OCR智能识别引擎</div>
+            <p style="margin-top:8px; font-size:13px; line-height:1.6;">支持票据、银行回单、承兑票据等资料的扫描/拍照上传，自动提取关键信息（发票代码/号码/金额/税额/购销方信息），准确率达98%以上。</p>
+          </div>
+          <div class="card">
+            <div class="badge badge-blue">RPA自动采集</div>
+            <p style="margin-top:8px; font-size:13px; line-height:1.6;">对接电子税务局、银行系统，实现月初自动远程提取进销项发票、银行回单信息，自动识别业务类型并智能入账生成凭证。</p>
+          </div>
+          <div class="card">
+            <div class="badge badge-yellow">承兑票据专项识别</div>
+            <p style="margin-top:8px; font-size:13px; line-height:1.6;">针对承兑票据手动录入痛点，开发专门的票据图像识别模块，自动提取出票人、收款人、金额、到期日等信息并同步至系统数据库。</p>
+          </div>
+          <div class="card">
+            <div class="badge badge-pink">多格式批量上传</div>
+            <p style="margin-top:8px; font-size:13px; line-height:1.6;">支持扫描件、照片、Excel清单等多格式文件批量上传，实现资料一键入库，提供按客户/时间/票据类型等多维度筛选与批量导出。</p>
+          </div>
+        </div>
+        <div class="highlight-box">将传统的纸质资料手动录入转变为自动采集与智能识别，票据采集环节人效占比从20%大幅降低。</div>
+      </div>
+
+      <!-- ===== 第13页：建设内容-账务处理 ===== -->
+      <div class="slide">
+        <div class="slide-title">建设内容 · 账务处理环节</div>
+        <div class="slide-subtitle">智能核算与自动做账（核心）——从"人工主导"到"AI主导、人工审核"</div>
+        <div class="grid-2">
+          <div class="card">
+            <div class="badge badge-red">AI成本结转模块</div>
+            <p style="margin-top:6px; font-size:12px; line-height:1.5;">针对生产制造、商贸企业成本结转工作量大的痛点，开发专属成本核算功能，支持原材料、人工、制造费用自动分摊，自动生成存货台账，实现多行业专属配置。</p>
+          </div>
+          <div class="card">
+            <div class="badge badge-blue">会计科目辅助推荐</div>
+            <p style="margin-top:6px; font-size:12px; line-height:1.5;">接入大数据科目辅助引擎，基于业务类型智能推荐会计科目，构建行业-科目映射知识图谱，解决科目归属不统一的问题。</p>
+          </div>
+          <div class="card">
+            <div class="badge badge-yellow">账务处理预警系统</div>
+            <p style="margin-top:6px; font-size:12px; line-height:1.5;">内置结账智能检查，覆盖账务完整性检查、余额异常检查、往来账龄分析、业务关联性检查、关键指标检查等多个维度。</p>
+          </div>
+          <div class="card">
+            <div class="badge badge-pink">凭证规则引擎</div>
+            <p style="margin-top:6px; font-size:12px; line-height:1.5;">依据场景化、智能化的业务逻辑，内设凭证规则引擎，实现系统自动做账，自动生成标准账务凭证和账簿报表。</p>
+          </div>
+        </div>
+        <div class="card" style="background:var(--blue); color:white;">
+          <div class="badge badge-yellow">ML模型支持</div>
+          <p style="margin-top:6px; font-size:13px; line-height:1.6;">运用机器学习模型实现所有类型的税项、费用及财务报表的自动记账。基于2.62亿+多维参数ML模型，持续优化记账准确率与推荐效果。</p>
+        </div>
+      </div>
+
+      <!-- ===== 第14页：建设内容-开发票 ===== -->
+      <div class="slide">
+        <div class="slide-title">建设内容 · 开发票环节</div>
+        <div class="slide-subtitle">一站式智能开票——打通税务系统最后一公里</div>
+        <div class="grid-2">
+          <div class="card">
+            <div class="badge badge-red">税种税率自动获取</div>
+            <p style="margin-top:8px; font-size:13px; line-height:1.6;">系统自动获取企业税种、税率核定信息，支持扫码登录、一键关联企业信息，减少手动配置环节。</p>
+          </div>
+          <div class="card">
+            <div class="badge badge-blue">开票用票管票一站式</div>
+            <p style="margin-top:8px; font-size:13px; line-height:1.6;">提供开票、用票、管票一站式平台，支持多方式快捷开票，通过智能精准赋码提升开票效率。</p>
+          </div>
+          <div class="card">
+            <div class="badge badge-yellow">进销项关联与账税联动</div>
+            <p style="margin-top:8px; font-size:13px; line-height:1.6;">进销项发票自动关联，账税数据实时联动，对开票整体合规性进行预判，减少税务风险。</p>
+          </div>
+          <div class="card">
+            <div class="badge badge-pink">开票结果同步</div>
+            <p style="margin-top:8px; font-size:13px; line-height:1.6;">实现发票与账务数据自动关联，开票结果实时同步至账务系统，避免数据孤岛和重复录入。</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== 第15页：建设内容-税务申报 ===== -->
+      <div class="slide">
+        <div class="slide-title">建设内容 · 税务申报环节</div>
+        <div class="slide-subtitle">批量智能申报——从核算到申报的自动化闭环</div>
+        <div class="grid-2">
+          <div class="card">
+            <div class="badge badge-red">全税种一键申报</div>
+            <p style="margin-top:6px; font-size:12px; line-height:1.5;">内置规则引擎，自动获取企业税种、税率核定信息，通过身份验证、数据加密、安全传输、逻辑校验等手段对接各地申报系统，实现安全稳定的全税种一键纳税申报。</p>
+          </div>
+          <div class="card">
+            <div class="badge badge-blue">批量申报任务</div>
+            <p style="margin-top:6px; font-size:12px; line-height:1.5;">支持多客户、全税种批量申报任务，实现无人值守申报，极大缩短人为干预申报过程，大征期效率提升显著。</p>
+          </div>
+          <div class="card">
+            <div class="badge badge-yellow">申报前智能审核</div>
+            <p style="margin-top:6px; font-size:12px; line-height:1.5;">系统自动进行表单数据检查、表间关系检查、费用率/毛利率/税负率检查分析，根据数据信息给出纳税提醒，杜绝人为错报、漏报。</p>
+          </div>
+          <div class="card">
+            <div class="badge badge-pink">汇算清缴自动化</div>
+            <p style="margin-top:6px; font-size:12px; line-height:1.5;">系统自动填写基础信息和表单，完成汇算清缴全流程，支持人工调整参数与规则配置。</p>
+          </div>
+        </div>
+        <div class="card" style="background:var(--yellow);">
+          <div class="badge badge-orange">申报状态实时追踪</div>
+          <p style="margin-top:6px; font-size:13px; line-height:1.6;">即时更新企业申报状态，对异常信息进行预警，申报台账支持查询所有申报任务历史，系统自动更新申报状态及异常预警。</p>
+        </div>
+      </div>
+
+      <!-- ===== 第16页：建设内容-凭证处理 ===== -->
+      <div class="slide">
+        <div class="slide-title">建设内容 · 凭证处理环节</div>
+        <div class="slide-subtitle">电子凭证簿管理——从纸质到电子化、自动化</div>
+        <div class="grid-2">
+          <div class="card">
+            <div class="badge badge-red">电子凭证自动生成</div>
+            <p style="margin-top:8px; font-size:13px; line-height:1.6;">系统自动生成记账凭证，支持人工调整参数与规则配置。查询电子凭证列表，详情查看，支持编辑调整（科目/金额/摘要）。</p>
+          </div>
+          <div class="card">
+            <div class="badge badge-blue">一键批量打印</div>
+            <p style="margin-top:8px; font-size:13px; line-height:1.6;">实现多客户凭证、账簿、报表、自制原始凭证一键批量打印，支持预览打印详情、编辑打印参数、执行批量打印。</p>
+          </div>
+          <div class="card">
+            <div class="badge badge-yellow">在线电子归档</div>
+            <p style="margin-top:8px; font-size:13px; line-height:1.6;">在线电子归档与合规存储，支持按客户、时间、凭证类型等多维度快速检索查询，电子凭证/账簿/报表自动归档存储。</p>
+          </div>
+          <div class="card">
+            <div class="badge badge-pink">审计追溯</div>
+            <p style="margin-top:8px; font-size:13px; line-height:1.6;">支持电子凭证共享与权限管理，查询归档文件，详情在线预览，下载PDF，满足审计追溯需求。</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== 第17页：建设内容-经营分析 ===== -->
+      <div class="slide">
+        <div class="slide-title">建设内容 · 经营分析报告</div>
+        <div class="slide-subtitle">标准化分析报告——业财税一体化分析</div>
+        <div class="grid-2">
+          <div class="card">
+            <div class="badge badge-red">多维度分析维度</div>
+            <p style="margin-top:8px; font-size:13px; line-height:1.6;">预设营收趋势、成本结构、现金流状况、税负分析、应收账款周转率、销售毛利率等多维度分析维度，打通业务、财务、税务数据孤岛。</p>
+          </div>
+          <div class="card">
+            <div class="badge badge-blue">报告自动生成</div>
+            <p style="margin-top:8px; font-size:13px; line-height:1.6;">系统自动提取经营数据生成报告初稿，支持人工修改完善。实时展示重要指标趋势图表，支持日期范围查询与图表数据导出。</p>
+          </div>
+          <div class="card">
+            <div class="badge badge-yellow">一户一策定制</div>
+            <p style="margin-top:8px; font-size:13px; line-height:1.6;">基于企业收入规模、纳税人资质、行业特征等多维度信息，提供一户一策定制化分析，主动识别企业经营风险，构建完善的费用管控体系。</p>
+          </div>
+          <div class="card">
+            <div class="badge badge-pink">报告管理</div>
+            <p style="margin-top:8px; font-size:13px; line-height:1.6;">查询企业历史报告列表，详情在线查看，下载PDF/Excel，支持删除旧版报告。报告质量标准化，不再依赖会计个人经验。</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== 第18页：建设内容-风险预警 ===== -->
+      <div class="slide">
+        <div class="slide-title">建设内容 · 风险预警系统</div>
+        <div class="slide-subtitle">智能风控引擎——覆盖工商、税务、财务等多维度自动化风险监控</div>
+        <div class="grid-2">
+          <div class="card">
+            <div class="badge badge-red">100+风险点位</div>
+            <p style="margin-top:6px; font-size:12px; line-height:1.5;">预设100多个风险点位，涵盖工商、税务、现金等10余大类财务数据。支持新增/编辑风险监测规则（税负率异常/成本波动/现金红字等），设置预警阈值。</p>
+          </div>
+          <div class="card">
+            <div class="badge badge-blue">动态知识图谱</div>
+            <p style="margin-top:6px; font-size:12px; line-height:1.5;">内置动态财税知识图谱与全国政策库，实时解析最新财税法规，自动匹配行业合规标准。实时同步最新财税法规，自动匹配行业资质标准。</p>
+          </div>
+          <div class="card">
+            <div class="badge badge-yellow">7×24h风险扫描</div>
+            <p style="margin-top:6px; font-size:12px; line-height:1.5;">AI风险扫描7×24小时在线，精准排查账务异常、税务风险，提前预警、主动处置。系统自动运行风险扫描任务，查询企业风险状态（绿色安全/黄色提示/红色预警）。</p>
+          </div>
+          <div class="card">
+            <div class="badge badge-pink">异常分析与提醒</div>
+            <p style="margin-top:6px; font-size:12px; line-height:1.5;">实现风险点位识别在预警、费用异常、预算超额等方面的自动监测与触发。通过站内消息、邮件、短信提醒，生成异常分析提示辅助人工排查，导出风险报告。</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== 第19页：建设内容-AI智能体 ===== -->
+      <div class="slide">
+        <div class="slide-title">建设内容 · AI智能体集成</div>
+        <div class="slide-subtitle">人机协同交付——从"人操作软件"到"AI辅助人工作+人裁决审核"</div>
+        <div class="grid-2">
+          <div class="card">
+            <div class="badge badge-red">企微侧边栏嵌入</div>
+            <p style="margin-top:8px; font-size:13px; line-height:1.6;">将AI Agent嵌入会计日常工作界面（企业微信侧边栏），无需切换系统即可一键完成社保查询、发票查验、账务调整、税务报表生成等操作，甚至驱动批量报税RPA流程。</p>
+          </div>
+          <div class="card">
+            <div class="badge badge-blue">人机分工</div>
+            <p style="margin-top:8px; font-size:13px; line-height:1.6;">AI承担标准化重复性工作（约70%），财税专家聚焦复杂账务调整、政策解读、风险研判、税务优化等高价值环节。实现"AI承担标准化工作，专业人做专业事"。</p>
+          </div>
+          <div class="card">
+            <div class="badge badge-yellow">目标人效</div>
+            <p style="margin-top:8px; font-size:13px; line-height:1.6;">单名会计服务客户数从200-300家提升至400-500家，效率提升超50%。通过Token消耗可视化推动成本精细化管理。</p>
+          </div>
+          <div class="card">
+            <div class="badge badge-pink">跨环节协作</div>
+            <p style="margin-top:8px; font-size:13px; line-height:1.6;">支持跨环节智能体协作：收资料→账务处理→申报→风险预警→报告，形成端到端流程自动化闭环。自然语言输入任务，系统自动执行并返回结果。</p>
+          </div>
+        </div>
+        <div class="speech-bubble" style="background:var(--yellow); color:var(--black);">
+          会计从操作者转变为意图理解和复杂问题裁决的"哨兵"，AI接管检索、核算和初步处理。
+        </div>
+      </div>
+
+      <!-- ===== 第20页：调研分析-收资料环节 ===== -->
+      <div class="slide">
+        <div class="slide-title">调研分析 · 收资料环节</div>
+        <div class="slide-subtitle">工作量占比20%——智能化票据采集与识别</div>
+        <div class="grid-2">
+          <div class="card">
+            <div class="badge badge-red">研究方向</div>
+            <ul class="list">
+              <li>图像识别（OCR）技术，特别是针对承兑票据的结构化提取</li>
+              <li>移动端/PC端上传组件选型（批量、多格式、自动压缩、方向校正）</li>
+              <li>数据与后续账务处理环节的字段映射关系</li>
             </ul>
           </div>
-          <div class="card yellow-bg">
-            <h3>转型诉求</h3>
-            <p>随着业务规模扩大与客户需求日益复杂，依赖<strong>人工经验与手动操作</strong>的作业模式已显露出：</p>
-            <ul>
-              <li>效率瓶颈</li>
-              <li>质量波动</li>
-              <li>合规风险增加</li>
+          <div class="card">
+            <div class="badge badge-blue">调研内容</div>
+            <ul class="list">
+              <li>承兑票据种类（银行承兑/商业承兑）及版式、清晰度情况</li>
+              <li>纸质资料平均数量（每日/每月），现有扫描设备</li>
+              <li>是否允许客户自助拍照上传</li>
+              <li>识别准确率最低容忍度（95%还是99%）</li>
             </ul>
           </div>
-          <div class="highlight-box">
-            <strong>建设目标：</strong>建设一套<strong>智能化、自动化、标准化的代理记账业务系统</strong>，深度融合AI能力，实现从"人工作业"向"智能体驱动"的转型升级。
-          </div>
-          <div class="card green-bg">
-            <h3>系统定位</h3>
-            <p>客户并非要求一个简单的记账工具，而是一个具备<strong>"AI识别 + 自动账务 + 批量申报 + 风险预警"</strong>能力的<strong>半自动化财务处理平台</strong>。</p>
-            <p><strong>核心价值：</strong>替代大量人工操作，提升代账公司或企业财务部门的工作效率。</p>
-          </div>
-        </div>
-
-        <!-- Slide 3: Pain Points -->
-        <div class="slide" data-index="3">
-          <div class="section-number">02</div>
-          <h2>核心痛点总结</h2>
-          <p style="margin-bottom:16px">结合会计所代理记账业务特点和常规财务ERP标准，当前核心痛点可归纳为<strong>四大类</strong>，覆盖业务全流程：</p>
-
           <div class="card">
-            <h3><span class="badge badge-pink">1</span> 人工依赖度高，效率低下</h3>
-            <div class="pain-point">
-              <p><strong>收资料环节：</strong>承兑票据需手动转化电子数据，<strong>20%工作量</strong>消耗在重复录入，易出错且耗时。</p>
-            </div>
-            <div class="pain-point">
-              <p><strong>凭证处理环节：</strong>全程人工操作，打印/装订/邮寄占<strong>20%工作量</strong>，人力与物料成本双高。</p>
-            </div>
-            <div class="pain-point">
-              <p><strong>税务申报环节：</strong>人工逐户登录系统申报，操作重复，单户处理时间长，难以应对批量客户需求。</p>
-            </div>
+            <div class="badge badge-yellow">难点</div>
+            <ul class="list">
+              <li>承兑票据版面不统一，部分要素位于不规则位置，OCR误识别率高</li>
+              <li>票据上的印章、折痕、反光会严重干扰识别</li>
+              <li>需设计"人工校验界面"，平衡自动化与准确性</li>
+            </ul>
           </div>
-
           <div class="card">
-            <h3><span class="badge badge-blue">2</span> 专业门槛高，标准化不足</h3>
-            <div class="pain-point">
-              <p><strong>账务处理环节</strong>（占<strong>50%核心工作量</strong>）：生产/商贸企业成本结转依赖会计经验，科目归属无统一标准。</p>
-            </div>
-            <div class="pain-point">
-              <p><strong>经营分析报告：</strong>缺乏数据支撑模板，报告质量因会计个人能力差异大，难以形成标准化服务。</p>
-            </div>
-            <div class="pain-point">
-              <p><strong>多账套管理：</strong>客户企业类型多样，账套切换繁琐，缺乏统一管理界面。</p>
-            </div>
-          </div>
-
-          <div class="card">
-            <h3><span class="badge badge-yellow">3</span> 风险管控薄弱，合规性差</h3>
-            <div class="pain-point">
-              <p><strong>税务风险：</strong>申报前无审核机制，易出现漏报、错报，面临税务处罚风险。</p>
-            </div>
-            <div class="pain-point">
-              <p><strong>数据风险：</strong>纸质凭证易丢失损坏，电子数据分散存储，缺乏安全归档机制。</p>
-            </div>
-            <div class="pain-point">
-              <p><strong>预警缺失：</strong>无专门风险监测系统，无法提前识别企业财务异常（如税负异常、资金风险）。</p>
-            </div>
-          </div>
-
-          <div class="card">
-            <h3><span class="badge badge-green">4</span> 系统脱节，协同性差</h3>
-            <div class="pain-point">
-              <p><strong>内外系统孤立：</strong>未与电子税务局、银行系统对接，数据需手动跨系统传递。</p>
-            </div>
-            <div class="pain-point">
-              <p><strong>业财数据割裂：</strong>客户业务数据（如销售、采购）与财务数据未打通，需人工匹配。</p>
-            </div>
-            <div class="pain-point">
-              <p><strong>团队协同弱：</strong>无统一工作平台，审核、交接流程依赖线下沟通，进度难追踪。</p>
-            </div>
-          </div>
-        </div>
-
-        <!-- Slide 4: Goals -->
-        <div class="slide" data-index="4">
-          <div class="section-number">03</div>
-          <h2>解决目标</h2>
-
-          <div class="grid-2">
-            <div class="card green-bg">
-              <h3><span class="badge badge-green">1</span> 效率提升</h3>
-              <p>实现票据、凭证、申报等环节<strong>80%以上自动化</strong>。</p>
-            </div>
-            <div class="card blue-bg">
-              <h3><span class="badge badge-blue">2</span> 质量可控</h3>
-              <p>建立标准化账务与预警体系，<strong>减少人为错误</strong>。</p>
-            </div>
-            <div class="card yellow-bg">
-              <h3><span class="badge badge-yellow">3</span> 合规强化</h3>
-              <p>确保税务申报与票据处理<strong>符合监管要求</strong>。</p>
-            </div>
-            <div class="card pink-bg">
-              <h3><span class="badge badge-pink">4</span> 成本降低</h3>
-              <p>减少纸质耗材、邮寄及<strong>重复人力投入</strong>。</p>
-            </div>
-            <div class="card purple-bg">
-              <h3><span class="badge badge-purple">5</span> 客户增值</h3>
-              <p>提供智能化的<strong>经营分析报告与风险提示</strong>。</p>
-            </div>
-          </div>
-
-          <div class="highlight-box" style="margin-top:20px">
-            <strong>核心KPI：</strong>AI处理占比 &ge; 60% &middot; 人工审核耗时 &le; 30秒/笔 &middot; 客户满意度 &ge; 4.5/5
-          </div>
-        </div>
-
-        <!-- Slide 5: Core Functions -->
-        <div class="slide" data-index="5">
-          <div class="section-number">04</div>
-          <h2>核心功能清单（建议系统模块）</h2>
-
-          <table class="data-table">
-            <thead>
-              <tr><th>序号</th><th>核心模块</th><th>二级模块</th><th>功能描述</th></tr>
-            </thead>
-            <tbody>
-              <tr><td><span class="badge">1</span></td><td><strong>智能收单</strong></td><td>票据采集 / 票据校验</td><td>多源票据上传、承兑票据解析、票据真伪查验</td></tr>
-              <tr><td><span class="badge">2</span></td><td><strong>智能账务处理</strong></td><td>AI科目推荐 / AI成本结转 / 账务预警 / 智能体处理</td><td>科目智能匹配、成本自动计算、异常项标注、凭证自动生成</td></tr>
-              <tr><td><span class="badge">3</span></td><td><strong>发票中心</strong></td><td>开票管理 / 收票管理</td><td>电子税务局对接、发票模板配置、进项发票归集</td></tr>
-              <tr><td><span class="badge">4</span></td><td><strong>税务申报</strong></td><td>批量申报 / 申报前审核 / 申报执行</td><td>一键生成申报表、数据比对校验、批量提交申报</td></tr>
-              <tr><td><span class="badge">5</span></td><td><strong>电子凭证库</strong></td><td>凭证生成 / 归档管理 / 交付管理</td><td>智能生成电子凭证、在线归档、客户在线查阅</td></tr>
-              <tr><td><span class="badge">6</span></td><td><strong>经营分析报告</strong></td><td>报告模板 / 自动生成 / 智能解读</td><td>多维度预设模板、数据提取填充、关键指标解读</td></tr>
-              <tr><td><span class="badge">7</span></td><td><strong>风险预警</strong></td><td>参数配置 / 异常监测 / 消息触达</td><td>预警规则设置、实时数据扫描、多渠道提醒</td></tr>
-              <tr><td><span class="badge">8</span></td><td><strong>系统管理</strong></td><td>企业档案 / 权限角色 / 日志审计</td><td>客户信息管理、多级权限控制、操作记录溯源</td></tr>
-            </tbody>
-          </table>
-
-          <div class="card" style="margin-top:16px">
-            <h3>功能统计</h3>
-            <div class="grid-4">
-              <div style="text-align:center"><div style="font-size:32px;font-weight:900;color:var(--pink)">8</div><div class="small">一级模块</div></div>
-              <div style="text-align:center"><div style="font-size:32px;font-weight:900;color:var(--blue)">29</div><div class="small">二级模块</div></div>
-              <div style="text-align:center"><div style="font-size:32px;font-weight:900;color:var(--green)">~87</div><div class="small">功能点</div></div>
-              <div style="text-align:center"><div style="font-size:32px;font-weight:900;color:var(--orange)">10-15</div><div class="small">预估月工期</div></div>
-            </div>
-          </div>
-         </div>
-
-        <!-- Slide 6: System Architecture - Product Architecture -->
-        <div class="slide" data-index="6">
-          <div class="section-number">05</div>
-          <h2>系统架构 — 产品架构</h2>
-          <div class="card">
-            <pre style="font-size:0.82rem;line-height:1.6;background:#fff;padding:12px;border:3px solid #000;overflow-x:auto;">
-财务代账作业平台
-│
-├── 前端应用层
-│   ├── 客户企业端（H5/小程序）     # 客户上传资料、查看报告、接收预警
-│   ├── 代账会计端（Web工作台）     # 核心作业界面：审核、做账、开票、申报
-│   └── 管理后台（Web）             # 客户管理、权限、规则配置、监控看板
-│
-├── 业务中台层
-│   ├── 资料采集中心               # OCR、导入、接口抓取
-│   ├── 智能账务引擎               # AI做账、成本结转、科目推荐、凭证生成
-│   ├── 税务应用中心               # 发票开具、批量申报、税负监控
-│   ├── 风控预警中心               # 规则引擎、实时监控、预警推送
-│   └── 分析报告中心               # 指标计算、报告生成、模板管理
-│
-├── 基础服务层
-│   ├── 企业/账套/用户权限服务
-│   ├── 会计科目与辅助核算服务
-│   ├── 工作流引擎（审核流、申报流）
-│   ├── 消息通知服务（站内信/短信/企微）
-│   ├── 文件存储与影像管理服务
-│   ├── 电子签章与档案服务
-│   └── 接口网关（金蝶/用友/电子税务局/银行）
-│
-└── 数据层
-    ├── 结构化数据库（MySQL/PostgreSQL）
-    ├── 影像文件存储（OSS/MinIO）
-    ├── 缓存（Redis）
-    └── 日志与审计（Elasticsearch）</pre>
-          </div>
-        </div>
-
-        <!-- Slide 7: System Architecture - Data Flow -->
-        <div class="slide" data-index="7">
-          <div class="section-number">05</div>
-          <h2>系统架构 — 核心数据流向</h2>
-          <div class="flowchart">
-            <div class="flow-node start">外部数据源</div>
-            <div class="flow-line-down"></div>
-            <div class="flow-node action">资料采集中心<br/><small>OCR / 电子票获取 / 银行导入</small></div>
-            <div class="flow-line-down"></div>
-            <div class="flow-node action">智能账务引擎<br/><small>AI做账 / 成本结转 / 凭证生成</small></div>
-            <div class="flow-line-down"></div>
-            <div class="flow-node decision">异常检测</div>
-            
-            <!-- 第一个分支：异常检测 -->
-            <div class="flow-branch">
-              <div class="branch-line">
-                <div class="branch-label warn">存疑</div>
-                <div class="flow-line-down"></div>
-                <div class="flow-node action" style="background:var(--yellow);">人工审核工作台</div>
-                <div class="flow-line-down"></div>
-                <div style="font-size:0.85rem; font-weight:700; text-align:center;">返回账务引擎</div>
-              </div>
-              <div class="branch-line">
-                <div class="branch-label success">通过</div>
-                <div class="flow-line-down"></div>
-                <div class="flow-node action" style="background:var(--blue);color:#fff;">生成记账凭证</div>
-              </div>
-            </div>
-            
-            <div class="flow-line-down"></div>
-            <div class="flow-node action">税务申报准备</div>
-            <div class="flow-line-down"></div>
-            <div class="flow-node decision">申报前校验</div>
-            
-            <!-- 第二个分支：申报前校验 -->
-            <div class="flow-branch">
-              <div class="branch-line">
-                <div class="branch-label warn">不通过</div>
-                <div class="flow-line-down"></div>
-                <div class="flow-node action" style="background:var(--yellow);">账务调整</div>
-              </div>
-              <div class="branch-line">
-                <div class="branch-label success">通过</div>
-                <div class="flow-line-down"></div>
-                <div class="flow-node action" style="background:var(--blue);color:#fff;">批量税务申报</div>
-              </div>
-            </div>
-            <div class="flow-line-down"></div>
-            <div class="flow-node end">归档与报告生成 → 客户交付</div>
-          </div>
-        </div>
-
-        <!-- Slide 8: 7.1 收资料环节 -->
-        <div class="slide" data-index="8">
-          <div class="section-number">08</div>
-          <h2>功能数量与调研方向</h2>
-          <h3><span class="badge badge-yellow">7.1</span> 收资料环节（工作量占比20%）</h3>
-
-          <div class="two-col">
-            <div class="card">
-              <h4>研究方向</h4>
-              <ul>
-                <li>图像识别（OCR）技术，特别是针对承兑票据的结构化提取</li>
-                <li>移动端/PC端上传组件选型（批量、多格式、自动压缩、方向校正）</li>
-                <li>数据与后续账务处理环节的字段映射关系</li>
-              </ul>
-            </div>
-            <div class="card">
-              <h4>调研内容</h4>
-              <ul>
-                <li>承兑票据种类（银行承兑/商业承兑）及版式、清晰度情况</li>
-                <li>纸质资料平均数量（每日/每月），现有扫描设备</li>
-                <li>是否允许客户自助拍照上传</li>
-                <li>识别准确率最低容忍度（95%还是99%）</li>
-              </ul>
-            </div>
-          </div>
-
-          <div class="two-col">
-            <div class="card">
-              <h4>难点</h4>
-              <ul>
-                <li>承兑票据版面不统一，部分要素位于不规则位置，OCR误识别率高</li>
-                <li>票据上的印章、折痕、反光会严重干扰识别</li>
-                <li>需设计"人工校验界面"，平衡自动化与准确性</li>
-              </ul>
-            </div>
-            <div class="card">
-              <h4>需要向客户了解的问题</h4>
-              <ul>
-                <li>是否接受"OCR提取 + 人工逐张确认"的半自动模式？</li>
-                <li>识别错误导致后续账务出错，责任如何界定？</li>
-                <li>是否需要保留原始图片作为法律凭证？</li>
-                <li>除发票、对账单、承兑票据外，还有哪些特殊单据需识别？</li>
-              </ul>
-            </div>
-          </div>
-
-          <div class="highlight-box">
-            <strong>关键数据：</strong>收资料环节消耗约20%工作量，OCR识别准确率是后续自动化的基础。建议承兑票据OCR准确率目标 &ge; 95%。
-          </div>
-        </div>
-
-        <!-- Slide 10: 6.2 账务处理环节 -->
-        <div class="slide" data-index="9">
-          <div class="section-number">07</div>
-          <h2>功能数量与调研方向</h2>
-          <h3><span class="badge badge-pink">7.2</span> 账务处理环节（工作量占比50%，核心）</h3>
-
-          <div class="two-col">
-            <div class="card">
-              <h4>研究方向</h4>
-              <ul>
-                <li>成本结转规则引擎：按品类/批次/加权平均/先进先出等规则，允许客户配置</li>
-                <li>会计科目推荐模型：关键词匹配 vs 外部知识库/向量检索</li>
-                <li>预警系统规则设计：借贷不平、金额为负、无附件、供应商异常等</li>
-                <li>智能体加工模块：自动读取原始凭证 &rarr; 生成分录草稿 &rarr; 等待人工审核</li>
-              </ul>
-            </div>
-            <div class="card">
-              <h4>调研内容</h4>
-              <ul>
-                <li>典型企业类型占比（如60%商贸、30%生产制造）</li>
-                <li>常用科目树层级、末级科目数量</li>
-                <li>成本结转最大工作量集中点</li>
-                <li>客户对"自动推荐科目"的信任程度</li>
-                <li>是否有历史账套数据可用于训练</li>
-              </ul>
-            </div>
-          </div>
-
-          <div class="two-col">
-            <div class="card">
-              <h4>难点</h4>
-              <ul>
-                <li>会计科目归属没有绝对唯一标准，不同会计判断可能不同</li>
-                <li>成本结转涉及多个前置单据，若无数据无法真正自动化</li>
-                <li>预警规则过严产生大量误报，过松则失去意义</li>
-                <li>智能体模块本质是工作流引擎，复杂度较高</li>
-              </ul>
-            </div>
-            <div class="card">
-              <h4>需要向客户了解的问题</h4>
-              <ul>
-                <li>是否接受"系统只生成建议分录，必须会计审核后方可过账"？</li>
-                <li>成本结转规则是否可由客户财务经理自行配置？</li>
-                <li>若无规范出入库数据，是否接受手工补录后再结转？</li>
-                <li>账务处理速度要求：每月5号前完成，系统能压缩到几天？</li>
-                <li>是否愿意提供过去一年脱敏凭证数据建立规则库？</li>
-              </ul>
-            </div>
-          </div>
-        </div>
-
-        <!-- Slide 11: 6.3 开发票环节 -->
-        <div class="slide" data-index="10">
-          <div class="section-number">07</div>
-          <h2>功能数量与调研方向</h2>
-          <h3><span class="badge badge-yellow">7.3</span> 开发票环节（非核心占比，但影响体验）</h3>
-
-          <div class="two-col">
-            <div class="card">
-              <h4>研究方向</h4>
-              <ul>
-                <li>电子税务局接口可行性：各地是否提供开放API？大部分需RPA或第三方税控服务商接口</li>
-                <li>扫码登录技术实现（扫脸/企业码）</li>
-                <li>发票模板与业务单据的映射关系</li>
-              </ul>
-            </div>
-            <div class="card">
-              <h4>调研内容</h4>
-              <ul>
-                <li>目前为多少家企业代开发票，每月平均开票量</li>
-                <li>税控设备类型（税务UKey、税控盘）及托管情况</li>
-                <li>是否接受第三方电子发票服务平台（可能有额外费用）</li>
-                <li>开票内容是否固定还是高度变化</li>
-              </ul>
-            </div>
-          </div>
-
-          <div class="two-col">
-            <div class="card">
-              <h4>难点</h4>
-              <ul>
-                <li>各地电子税务局接口不稳定，政策变化频繁，自行对接维护成本极高</li>
-                <li>RPA方式容易被验证码、滑块、人脸识别阻断，可靠性不足</li>
-                <li>红字发票、作废、冲红等异常流程难以全自动化</li>
-              </ul>
-            </div>
-            <div class="card">
-              <h4>需要向客户了解的问题</h4>
-              <ul>
-                <li>是否允许集成第三方成熟电子发票API（诺诺网、百望云）？预算是否覆盖？</li>
-                <li>自动开票失败，是否可降级为"生成待开票数据文件，人工导入"？</li>
-                <li>开票环节是否需要反向更新到账务处理（如自动生成应收账款凭证）？</li>
-              </ul>
-            </div>
-          </div>
-        </div>
-
-        <!-- Slide 12: 6.4 税务申报环节 -->
-        <div class="slide" data-index="11">
-          <div class="section-number">07</div>
-          <h2>功能数量与调研方向</h2>
-          <h3><span class="badge badge-pink">7.4</span> 税务申报环节（非核心占比，但风险最高）</h3>
-
-          <div class="two-col">
-            <div class="card">
-              <h4>研究方向</h4>
-              <ul>
-                <li>批量申报可行性：RPA逐个登录 vs 税务局备案接口（需代理商资质）</li>
-                <li>申报前校验逻辑：收入与增值税申报表一致性、进项税匹配、利润与所得税钩稽</li>
-                <li>数据提取范围：科目余额表、纳税调整表、发票汇总表等自动生成申报表</li>
-              </ul>
-            </div>
-            <div class="card">
-              <h4>调研内容</h4>
-              <ul>
-                <li>服务企业的税种及申报频率</li>
-                <li>目前申报错误/漏报的主要原因</li>
-                <li>是否允许系统生成XML/Excel由人工上传？还是必须全自动？</li>
-                <li>申报错误导致罚款，系统提供方是否承担责任？</li>
-              </ul>
-            </div>
-          </div>
-
-          <div class="two-col">
-            <div class="card">
-              <h4>难点</h4>
-              <ul>
-                <li>税务政策存在地域差异和时效性，规则需持续更新</li>
-                <li>批量申报需存储企业税务局账号密码，存在安全合规风险</li>
-                <li>税务局接口申请门槛高（通常要求涉税专业服务机构且备案）</li>
-              </ul>
-            </div>
-            <div class="card">
-              <h4>需要向客户了解的问题</h4>
-              <ul>
-                <li>是否接受"系统自动填报 + 生成预览表 + 人工一键提交"？</li>
-                <li>由谁管理各企业电子税务局登录凭证？系统是否可用保险柜模块存储？</li>
-                <li>税务局接口变更导致申报失败，是否接受人工应急处理？</li>
-                <li>是否已有其他申报辅助软件？为何不满意？</li>
-              </ul>
-            </div>
-          </div>
-
-          <div class="highlight-box pink">
-            <strong>风险提示：</strong>税务申报是风险最高的环节，建议首期采用"半自动"模式（系统生成 + 人工确认），避免全自动申报带来的合规风险。
-          </div>
-        </div>
-
-        <!-- Slide 13: 6.5 凭证处理环节 -->
-        <div class="slide" data-index="12">
-          <div class="section-number">07</div>
-          <h2>功能数量与调研方向</h2>
-          <h3><span class="badge badge-yellow">7.5</span> 凭证处理环节（工作量占比20%）</h3>
-
-          <div class="two-col">
-            <div class="card">
-              <h4>研究方向</h4>
-              <ul>
-                <li>电子凭证生成：记账凭证 + 原始单据图片汇总为PDF/OFD</li>
-                <li>在线归档目录结构（按企业-年度-月份-凭证号）</li>
-                <li>与打印、装订、邮寄供应商对接可能性</li>
-              </ul>
-            </div>
-            <div class="card">
-              <h4>调研内容</h4>
-              <ul>
-                <li>每月生成多少本凭证，每本平均厚度</li>
-                <li>打印装订具体要求（封面格式、针式打印、打孔位置）</li>
-                <li>是否必须保留纸质档案满足审计/法律要求</li>
-                <li>是否已有合作打印寄送外包商</li>
-              </ul>
-            </div>
-          </div>
-
-          <div class="two-col">
-            <div class="card">
-              <h4>难点</h4>
-              <ul>
-                <li>电子凭证法律效力：需了解所在地是否允许电子会计凭证归档</li>
-                <li>自动排版时原始图片可能模糊、颠倒、重复</li>
-                <li>邮寄地址管理频繁变动</li>
-              </ul>
-            </div>
-            <div class="card">
-              <h4>需要向客户了解的问题</h4>
-              <ul>
-                <li>是否愿意完全放弃纸质凭证，改为加密电子光盘或云归档？</li>
-                <li>如必须保留纸质，是否接受"系统生成打印清单和封面，客户自行打印装订"？</li>
-                <li>未来3年是否采用电子会计档案合规模式？</li>
-              </ul>
-            </div>
-          </div>
-        </div>
-
-        <!-- Slide 14: 6.6 经营分析报告 -->
-        <div class="slide" data-index="13">
-          <div class="section-number">07</div>
-          <h2>功能数量与调研方向</h2>
-          <h3><span class="badge badge-green">6.6</span> 企业经营分析报告环节（非核心占比，但增值）</h3>
-
-          <div class="two-col">
-            <div class="card">
-              <h4>研究方向</h4>
-              <ul>
-                <li>标准化指标库：资产负债率、毛利率、应收账款周转率、现金流结构及行业对比数据来源</li>
-                <li>报告模板设计：可配置段落、图表、文字解释模板</li>
-                <li>数据接口：从账务系统抓取财务报表、科目余额、辅助核算</li>
-              </ul>
-            </div>
-            <div class="card">
-              <h4>调研内容</h4>
-              <ul>
-                <li>目前提供给企业主的报告样例，哪些部分最受重视</li>
-                <li>企业主常见提问（如"为何利润下滑""哪个产品赚钱"）</li>
-                <li>是否接受报告完全由系统自动生成不修改</li>
-                <li>是否需支持不同行业不同分析重点</li>
-              </ul>
-            </div>
-          </div>
-
-          <div class="two-col">
-            <div class="card">
-              <h4>难点</h4>
-              <ul>
-                <li>分析结论不能过于笼统，需结合业务数据，但业务数据往往不在财务系统中</li>
-                <li>若无预算或去年同期数据，无法做同比/环比</li>
-                <li>报告建议部分如错误，可能误导客户决策，带来责任风险</li>
-              </ul>
-            </div>
-            <div class="card">
-              <h4>需要向客户了解的问题</h4>
-              <ul>
-                <li>是否可以先只做"数据可视化仪表板"，而不自动生成带文字结论的报告？</li>
-                <li>客户是否愿意为每个企业补充行业代码和经营数据提升分析质量？</li>
-                <li>系统生成的结论错了，客户是否会要求承担咨询责任？</li>
-              </ul>
-            </div>
-          </div>
-        </div>
-
-        <!-- Slide 15: 6.7 风险预警系统 -->
-        <div class="slide" data-index="14">
-          <div class="section-number">07</div>
-          <h2>功能数量与调研方向</h2>
-          <h3><span class="badge badge-pink">6.7</span> 风险预警系统（额外需求）</h3>
-
-          <div class="two-col">
-            <div class="card">
-              <h4>研究方向</h4>
-              <ul>
-                <li>多维度预警配置：连续2个月毛利率下降超10%、单笔报销超5万、应付逾期30天以上等</li>
-                <li>实时监测方案：每日定时扫描 vs 每次数据导入触发</li>
-                <li>提醒方式：站内信、邮件、钉钉/企微机器人</li>
-                <li>异常分析提示：关联到具体科目、凭证、原始图片</li>
-              </ul>
-            </div>
-            <div class="card">
-              <h4>调研内容</h4>
-              <ul>
-                <li>最常遇到的财务异常场景（存货账实不符、往来长期挂账、税负率异常）</li>
-                <li>是否需对不同企业设置不同预警阈值</li>
-                <li>预警产生后，由系统指派任务还是仅通知</li>
-                <li>是否希望与税务局纳税风险提示对接（难度极大）</li>
-              </ul>
-            </div>
-          </div>
-
-          <div class="two-col">
-            <div class="card">
-              <h4>难点</h4>
-              <ul>
-                <li>预警规则一旦设定，可能出现大量无效预警，导致客户关闭功能</li>
-                <li>部分异常需跨期间数据，初期缺乏历史数据无法判断</li>
-                <li>"实时监测"对系统性能要求较高，管理一千家以上企业时压力大</li>
-              </ul>
-            </div>
-            <div class="card">
-              <h4>需要向客户了解的问题</h4>
-              <ul>
-                <li>是否愿意分阶段建设：首期只做3-5项最核心预警？</li>
-                <li>是否有专人处理预警，还是希望系统自动处理？</li>
-                <li>预警误报是否会损害客户对系统的信任？</li>
-              </ul>
-            </div>
-          </div>
-        </div>
-
-        <!-- Slide 16: Current Issues -->
-        <div class="slide" data-index="15">
-          <div class="section-number">08</div>
-          <h2>当前存在问题（待与客户深入确认）</h2>
-          <p style="margin-bottom:16px">共 <strong>11项</strong> 关键问题，需在售前阶段与客户高层逐一确认：</p>
-
-          <div class="grid-2">
-            <div class="card">
-              <h4><span class="badge badge-pink">7.1</span> 承兑票据相关</h4>
-              <p>客户处理的承兑票据是银行承兑还是商业承兑？是否有统一格式？OCR识别准确率要求？（建议&ge;95%）</p>
-            </div>
-            <div class="card">
-              <h4><span class="badge badge-blue">7.2</span> 成本结转相关</h4>
-              <p>是否涉及多车间、多产品、联产品/副产品？需预设哪些计算逻辑（标准成本、实际成本）？</p>
-            </div>
-            <div class="card">
-              <h4><span class="badge badge-yellow">7.3</span> 电子税务局接口</h4>
-              <p>目前所在地电子税务局是否对外提供标准API？批量申报是否允许第三方调用？</p>
-            </div>
-            <div class="card">
-              <h4><span class="badge badge-green">7.4</span> 电子凭证法律效力</h4>
-              <p>客户是否已取得客户同意以电子形式存档凭证？是否需同时打印纸质版备查？</p>
-            </div>
-            <div class="card">
-              <h4><span class="badge badge-pink">7.5</span> 数据安全</h4>
-              <p>多企业数据是否要求物理隔离？是否允许使用公有云？</p>
-            </div>
-            <div class="card">
-              <h4><span class="badge badge-purple">7.6</span> 现有ERP对接</h4>
-              <p>客户是否已用某品牌财务软件（金蝶、用友）？新建系统是全盘替换还是对接？</p>
-            </div>
-            <div class="card">
-              <h4><span class="badge badge-blue">7.7</span> 分析报告使用方</h4>
-              <p>报告是给客户老板看，还是内部管理使用？是否需要图文混排、PPT导出？</p>
-            </div>
-            <div class="card">
-              <h4><span class="badge badge-yellow">7.8</span> 预警推送机制</h4>
-              <p>是否需要客户侧也能自建预警规则？是否涉及跨部门数据联动？</p>
-            </div>
-            <div class="card">
-              <h4><span class="badge badge-orange">7.9</span> 数据来源与历史数据</h4>
-              <p>能否提供大量真实、脱敏的账务数据用于训练？没有数据，AI模块基本无法落地。</p>
-            </div>
-            <div class="card">
-              <h4><span class="badge badge-teal">7.10</span> 外部接口策略</h4>
-              <p>是否愿意采购第三方成熟的电子发票、电子税务局对接服务（百望、诺诺、云账房）？</p>
-            </div>
-            <div class="card">
-              <h4><span class="badge badge-pink">7.11</span> 责任边界</h4>
-              <p>系统自动生成的科目、申报数据、分析报告出错导致损失，责任如何划分？建议书面约定"系统仅提供辅助建议"。</p>
-            </div>
-          </div>
-        </div>
-
-        <!-- Slide 17: 8.1 AI Architecture -->
-        <div class="slide" data-index="16">
-          <div class="section-number">09</div>
-          <h2>AI维度深化分析</h2>
-          <h3><span class="badge badge-pink">8.1</span> 整体AI架构设计</h3>
-
-          <div class="card">
-            <h4>8.1.1 能力分层模型</h4>
-            <pre>
-&#9484;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9488;
-&#9474;                    &#24212;&#29992;&#23618;&#65288;&#19994;&#21153; Agent&#65289;                       &#9474;
-&#9474;  &#31080;&#25454;&#35782;&#21035;Agent &#9474; &#20570;&#36134;Agent &#9474; &#24320;&#31080;Agent &#9474; &#30003;&#25253;Agent &#9474; &#39118;&#25511;Agent &#9474;
-&#9500;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9508;
-&#9474;                    &#32534;&#25490;&#23618;&#65288;&#22810;Agent&#21327;&#20316;&#65289;                      &#9474;
-&#9474;         &#20219;&#21153;&#20998;&#35299;&#22120; &#9474; &#29366;&#24577;&#31649;&#29702;&#22120; &#9474; &#36335;&#30001;&#20998;&#21457;&#22120; &#9474; &#32467;&#26524;&#32858;&#21512;&#22120;        &#9474;
-&#9500;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9508;
-&#9474;                    &#33021;&#21147;&#23618;&#65288;&#27169;&#22411;+&#24037;&#20855;&#65289;                        &#9474;
-&#9474;  LLM&#25512;&#29702; &#9474; OCR&#35270;&#35273; &#9474; &#35268;&#21017;&#24341;&#25806; &#9474; &#21521;&#37327;&#26816;&#32034; &#9474; &#25968;&#25454;&#20998;&#26512; &#9474; API&#35843;&#29992;   &#9474;
-&#9500;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9508;
-&#9474;                    &#25968;&#25454;&#23618;&#65288;&#30693;&#35782;+&#35757;&#32451;&#25968;&#25454;&#65289;                    &#9474;
-&#9474;  &#20250;&#35745;&#31185;&#30446;&#24211; &#9474; &#34892;&#19994;&#30693;&#35782;&#24211; &#9474; &#21382;&#21490;&#36134;&#22871; &#9474; &#31080;&#25454;&#27169;&#26495;&#24211; &#9474; &#25919;&#31574;&#27861;&#35268;&#24211;  &#9474;
-&#9492;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9496;</pre>
-          </div>
-
-          <div class="card">
-            <h4>8.1.2 核心设计原则</h4>
-            <table class="data-table">
-              <thead><tr><th>原则</th><th>说明</th></tr></thead>
-              <tbody>
-                <tr><td><strong>人机协作，非替代</strong></td><td>AI负责标准化、重复性工作（70%），会计负责判断、审核、异常处理（30%）</td></tr>
-                <tr><td><strong>置信度分层</strong></td><td>高置信度结果自动过账，中置信度推荐+人工确认，低置信度直接转人工</td></tr>
-                <tr><td><strong>可解释性优先</strong></td><td>AI做出的每个推荐必须附带依据（关联哪张票据、触发了哪条规则、参考了哪个历史案例）</td></tr>
-                <tr><td><strong>渐进式智能化</strong></td><td>先规则后AI，先辅助后自动，避免一步到位导致的系统性风险</td></tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        <!-- Slide 18: 8.2 Multi-Agent -->
-        <div class="slide" data-index="17">
-          <div class="section-number">09</div>
-          <h2>AI维度深化分析</h2>
-          <h3><span class="badge badge-blue">8.2</span> 多智能体（Multi-Agent）架构设计</h3>
-
-          <div class="card">
-            <h4>8.2.1 Agent划分与职责</h4>
-            <table class="data-table">
-              <thead><tr><th>Agent名称</th><th>输入</th><th>输出</th><th>核心能力</th></tr></thead>
-              <tbody>
-                <tr><td><strong>票据采集Agent</strong></td><td>原始影像/电子文件</td><td>结构化票据数据</td><td>OCR、版面分析、格式解析</td></tr>
-                <tr><td><strong>票据分类Agent</strong></td><td>结构化票据数据</td><td>票据类型标签</td><td>分类模型、规则匹配</td></tr>
-                <tr><td><strong>做账Agent</strong></td><td>分类后的票据+历史账套</td><td>记账凭证草稿</td><td>科目推荐、分录生成</td></tr>
-                <tr><td><strong>成本结转Agent</strong></td><td>库存数据+出入库记录</td><td>成本结转凭证</td><td>成本算法引擎</td></tr>
-                <tr><td><strong>开票Agent</strong></td><td>开票申请+企业信息</td><td>电子发票</td><td>电子税务局RPA/API</td></tr>
-                <tr><td><strong>申报Agent</strong></td><td>当期账务数据+税种配置</td><td>申报表数据</td><td>报表生成引擎</td></tr>
-                <tr><td><strong>风控Agent</strong></td><td>全量账务+申报+票据数据</td><td>风险预警+异常分析</td><td>异常检测模型</td></tr>
-                <tr><td><strong>报告Agent</strong></td><td>财务报表+指标配置</td><td>经营分析报告</td><td>NLG、图表生成</td></tr>
-              </tbody>
-            </table>
-          </div>
-
-          <div class="two-col">
-            <div class="card">
-              <h4>8.2.2 Agent协作模式</h4>
-              <p>票据采集Agent &rarr; 票据分类Agent &rarr; 人工确认 &rarr; 做账Agent &rarr; 异常检测 &rarr; 成本结转Agent &rarr; 开票/申报/风控/报告Agent</p>
-              <p class="small">形成完整的代账流水线，每个Agent输出作为下一Agent的输入。</p>
-            </div>
-            <div class="card">
-              <h4>8.2.3 编排器（Orchestrator）设计</h4>
-              <ul>
-                <li><strong>任务分解：</strong>将"月度代账"拆解为子任务DAG（有向无环图）</li>
-                <li><strong>状态机管理：</strong>每个企业+每个账期维护状态机（收资料中 &rarr; 识别完成 &rarr; 做账中 &rarr; 审核中 &rarr; 申报中 &rarr; 归档完成）</li>
-                <li><strong>错误恢复：</strong>某个Agent失败后，支持重试、回滚、转人工</li>
-                <li><strong>并发控制：</strong>同一企业多个Agent串行执行，不同企业可并行</li>
-              </ul>
-            </div>
-          </div>
-        </div>
-
-        <!-- Slide 19: 8.3 LLM -->
-        <div class="slide" data-index="18">
-          <div class="section-number">09</div>
-          <h2>AI维度深化分析</h2>
-          <h3><span class="badge badge-yellow">8.3</span> 大语言模型（LLM）选型与训练策略</h3>
-
-          <div class="card">
-            <h4>8.3.1 模型选型矩阵</h4>
-            <table class="data-table">
-              <thead><tr><th>应用场景</th><th>推荐模型</th><th>部署方式</th><th>原因</th></tr></thead>
-              <tbody>
-                <tr><td>科目推荐/分录生成</td><td>GPT-4 / Claude 3.5 / 通义千问2.5</td><td>API调用</td><td>需强推理能力，中文会计术语理解</td></tr>
-                <tr><td>摘要生成</td><td>同上，或本地Qwen2.5-14B</td><td>API/本地</td><td>相对简单，本地模型可满足</td></tr>
-                <tr><td>报告NLG</td><td>GPT-4 / Claude 3.5</td><td>API调用</td><td>需长文本生成能力、专业表达</td></tr>
-                <tr><td>风控规则解释</td><td>本地Qwen2.5-7B / GLM-4-9B</td><td>本地部署</td><td>高频调用，本地成本低</td></tr>
-                <tr><td>智能客服/FAQ</td><td>本地Embedding + RAG + 轻量LLM</td><td>本地部署</td><td>知识库问答，不需超强推理</td></tr>
-                <tr><td>代码生成（RPA）</td><td>Claude 3.5 / GPT-4o</td><td>API调用</td><td>代码能力最强</td></tr>
-              </tbody>
-            </table>
-          </div>
-
-          <div class="two-col">
-            <div class="card">
-              <h4>8.3.2 是否需要微调？</h4>
-              <table class="data-table">
-                <thead><tr><th>任务</th><th>建议</th></tr></thead>
-                <tbody>
-                  <tr><td>会计分录生成</td><td><strong>推荐微调</strong></td></tr>
-                  <tr><td>科目推荐</td><td><strong>推荐微调</strong></td></tr>
-                  <tr><td>摘要生成</td><td>可不微调，Prompt+RAG</td></tr>
-                  <tr><td>报告NLG</td><td>可不微调，Prompt+模板</td></tr>
-                  <tr><td>异常检测解释</td><td>可不微调</td></tr>
-                </tbody>
-              </table>
-            </div>
-            <div class="card">
-              <h4>8.3.3 微调数据准备</h4>
-              <ul>
-                <li><strong>冷启动：</strong>每个行业至少500-1000条高质量标注样本</li>
-                <li><strong>持续优化：</strong>每月收集人工修正数据，增量微调</li>
-                <li><strong>数据脱敏：</strong>企业名称替换为代号，金额按比例缩放，敏感科目抽象化</li>
-              </ul>
-            </div>
-          </div>
-
-          <div class="card">
-            <h4>8.3.4 RAG（检索增强生成）架构</h4>
-            <table class="data-table">
-              <thead><tr><th>知识库</th><th>内容</th><th>更新频率</th><th>检索方式</th></tr></thead>
-              <tbody>
-                <tr><td>会计科目库</td><td>科目编码、名称、余额方向、辅助核算维度</td><td>低</td><td>精确匹配+语义相似</td></tr>
-                <tr><td>业务场景库</td><td>"购买办公用品"&rarr;"管理费用-办公费"等映射</td><td>中</td><td>向量检索</td></tr>
-                <tr><td>行业规则库</td><td>制造业成本结转规则、商贸业库存计价规则</td><td>低</td><td>关键词检索</td></tr>
-                <tr><td>政策法规库</td><td>税法条文、申报表填写说明、税率表</td><td>高</td><td>向量检索+时间过滤</td></tr>
-                <tr><td>历史账套库</td><td>脱敏后的历史凭证、分录模式</td><td>高</td><td>向量检索（相似案例）</td></tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        <!-- Slide 20: 8.4 OCR -->
-        <div class="slide" data-index="19">
-          <div class="section-number">09</div>
-          <h2>AI维度深化分析</h2>
-          <h3><span class="badge badge-green">8.4</span> OCR与文档智能（Document AI）</h3>
-
-          <div class="card">
-            <h4>8.4.1 票据识别技术栈</h4>
-            <table class="data-table">
-              <thead><tr><th>票据类型</th><th>技术方案</th><th>难点</th><th>预期准确率</th></tr></thead>
-              <tbody>
-                <tr><td>增值税发票（电子）</td><td>税务局电子发票接口/XML解析</td><td>版式标准化，易处理</td><td>99%+</td></tr>
-                <tr><td>增值税发票（纸质/拍照）</td><td>OCR（PaddleOCR/EasyOCR）+版面分析</td><td>拍照角度、光照、折叠</td><td>95-97%</td></tr>
-                <tr><td>银行对账单（PDF）</td><td>PDF文本提取/表格识别</td><td>各银行版式差异大</td><td>90-95%</td></tr>
-                <tr><td>银行对账单（拍照）</td><td>OCR+表格重建</td><td>表格线缺失、跨页</td><td>85-90%</td></tr>
-                <tr><td>承兑汇票（机打）</td><td>专用模板OCR</td><td>版式相对统一</td><td>92-95%</td></tr>
-                <tr><td><strong>承兑汇票（手写）</strong></td><td>OCR+手写体增强</td><td><strong>手写体、背书栏密集</strong></td><td><strong>75-85%</strong></td></tr>
-                <tr><td>报销单</td><td>OCR+字段抽取</td><td>格式不统一、附件混贴</td><td>80-88%</td></tr>
-              </tbody>
-            </table>
-          </div>
-
-          <div class="two-col">
-            <div class="card">
-              <h4>8.4.2 手写体识别专项方案</h4>
-              <ol>
-                <li><strong>数据增强：</strong>旋转、拉伸、噪声、仿射变换</li>
-                <li><strong>专用模型：</strong>TrOCR或手写体专用OCR（Chinese-HWDB预训练）</li>
-                <li><strong>版面先验：</strong>利用承兑汇票固定版面，先定位字段区域再识别</li>
-                <li><strong>人机回环：</strong>手写体字段置信度低于90%时，直接转人工录入</li>
-                <li><strong>持续学习：</strong>将人工校正后的手写体样本定期回流训练</li>
-              </ol>
-            </div>
-            <div class="card">
-              <h4>8.4.3 文档智能平台选型</h4>
-              <table class="data-table">
-                <thead><tr><th>方案</th><th>优点</th><th>缺点</th></tr></thead>
-                <tbody>
-                  <tr><td><strong>自研（PaddleOCR+自训练）</strong></td><td>可控、可定制、数据不外流</td><td>投入大、需算法团队</td></tr>
-                  <tr><td>百度智能文档/腾讯云OCR</td><td>开箱即用、发票识别成熟</td><td>按调用量收费、数据上云</td></tr>
-                  <tr><td>合合信息/旷视</td><td>票据识别专业性强</td><td>成本高、接口封闭</td></tr>
-                  <tr><td><strong>开源+微调（推荐）</strong></td><td>平衡成本与效果、数据可控</td><td>需一定技术投入</td></tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-
-        <!-- Slide 21: 8.5 Core AI Modules -->
-        <div class="slide" data-index="20">
-          <div class="section-number">09</div>
-          <h2>AI维度深化分析</h2>
-          <h3><span class="badge badge-purple">8.5</span> 核心AI模块详细设计</h3>
-
-          <div class="two-col">
-            <div class="card">
-              <h4>8.5.1 AI成本结转模块</h4>
-              <p><strong>方案：规则引擎 + AI辅助</strong></p>
-              <ul>
-                <li><strong>规则层：</strong>预设成本结转规则库（制造业加权平均/先进先出、商贸业进销差价/毛利率、服务业直接成本归集）</li>
-                <li><strong>配置层：</strong>企业级参数配置（存货计价方法、成本项目定义、分摊维度、在制品完工程度）</li>
-                <li><strong>AI层：</strong>基于历史数据推荐分摊比例、异常波动检测、在制品成本估算</li>
-                <li><strong>审核层：</strong>成本结转凭证<strong>必须经会计审核</strong></li>
-              </ul>
-              <p class="small" style="margin-top:8px"><strong>原则：AI不替代决策，只辅助计算和预警。</strong></p>
-            </div>
-            <div class="card">
-              <h4>8.5.2 会计科目推荐引擎</h4>
-              <p><strong>模型架构：</strong></p>
-              <p class="small">输入：票据结构化数据 + 企业历史科目使用模式</p>
-              <p class="small">&darr; 特征工程 &darr; 多路召回（规则路由 + 向量检索 + LLM推理）&darr; 融合排序输出Top-3 + 置信度</p>
-              <p style="margin-top:8px"><strong>关键挑战：</strong></p>
-              <ul>
-                <li>一义多科："办公用品"可能入管理费用或销售费用</li>
-                <li>新科目发现：新增业务需新增明细科目</li>
-                <li>辅助核算维度：推荐科目时同时推荐辅助核算</li>
-              </ul>
-            </div>
-          </div>
-
-          <div class="two-col">
-            <div class="card">
-              <h4>8.5.3 异常检测系统</h4>
-              <table class="data-table">
-                <thead><tr><th>维度</th><th>检测项</th><th>方法</th></tr></thead>
-                <tbody>
-                  <tr><td>账务逻辑</td><td>借贷不平衡、红字分录异常</td><td>规则引擎</td></tr>
-                  <tr><td>金额异常</td><td>单笔超历史3&sigma;、整数聚集</td><td>统计模型</td></tr>
-                  <tr><td>科目异常</td><td>科目频率突变、非常规组合</td><td>频率统计+关联规则</td></tr>
-                  <tr><td>税负异常</td><td>增值税税负率偏离行业均值</td><td>规则+统计</td></tr>
-                  <tr><td>成本异常</td><td>毛利率异常波动、成本倒挂</td><td>时间序列分析</td></tr>
-                  <tr><td>往来异常</td><td>应收/应付长期挂账</td><td>账龄分析+图谱</td></tr>
-                  <tr><td>发票异常</td><td>进销项不匹配、作废率过高</td><td>发票底账比对</td></tr>
-                </tbody>
-              </table>
-            </div>
-            <div class="card">
-              <h4>8.5.4 经营分析报告NLG模块</h4>
-              <p><strong>方案：模板骨架 + AI血肉</strong></p>
-              <ol>
-                <li><strong>模板选择：</strong>根据周期（月/季/年）和行业选择模板</li>
-                <li><strong>数据填充：</strong>从数据库提取指标计算结果 + 图表生成</li>
-                <li><strong>AI润色（LLM）：</strong>输入指标数值+变化趋势+行业对标，输出分析文字</li>
-                <li><strong>人工审核：</strong>会计修改AI文字，补充业务洞察</li>
-              </ol>
-              <p style="margin-top:8px"><strong>Prompt设计要点：</strong></p>
-              <ul>
-                <li>严格限制LLM只能基于提供的数字生成文字，禁止编造</li>
-                <li>预设框架："数据事实 &rarr; 变化原因 &rarr; 业务影响 &rarr; 建议措施"</li>
-              </ul>
-            </div>
-          </div>
-        </div>
-
-        <!-- Slide 22: 8.6 Data Security -->
-        <div class="slide" data-index="21">
-          <div class="section-number">09</div>
-          <h2>AI维度深化分析</h2>
-          <h3><span class="badge badge-pink">8.6</span> 数据安全与隐私保护</h3>
-
-          <div class="card">
-            <h4>8.6.1 财务数据的敏感性分级</h4>
-            <table class="data-table">
-              <thead><tr><th>级别</th><th>数据类型</th><th>处理要求</th></tr></thead>
-              <tbody>
-                <tr><td><strong>绝密</strong></td><td>企业原始账套、银行流水明细、发票底账</td><td>加密存储、访问审计、禁止外发</td></tr>
-                <tr><td><strong>机密</strong></td><td>科目余额表、财务报表、纳税申报表</td><td>角色权限控制、操作日志</td></tr>
-                <tr><td><strong>内部</strong></td><td>分析指标、预警记录、报告模板</td><td>基本权限控制</td></tr>
-              </tbody>
-            </table>
-          </div>
-
-          <div class="two-col">
-            <div class="card">
-              <h4>8.6.2 AI场景下的数据安全挑战</h4>
-              <table class="data-table">
-                <thead><tr><th>场景</th><th>风险</th><th>对策</th></tr></thead>
-                <tbody>
-                  <tr><td>调用云端LLM API</td><td>票据内容上传至第三方</td><td>敏感字段脱敏、优先本地模型、签署DPA</td></tr>
-                  <tr><td>训练数据准备</td><td>历史账套含真实企业数据</td><td>名称替换代号、金额比例缩放、敏感科目抽象</td></tr>
-                  <tr><td>RAG知识库</td><td>检索结果可能泄露其他企业信息</td><td>企业级数据隔离、向量库按企业分片</td></tr>
-                  <tr><td>模型输出</td><td>AI可能"记忆"训练数据敏感信息</td><td>输出审核层、禁止输出原始金额和企业名称</td></tr>
-                </tbody>
-              </table>
-            </div>
-            <div class="card">
-              <h4>8.6.3 本地化部署方案</h4>
-              <p><strong>混合部署架构：</strong></p>
-              <pre>
-本地私有云:
-  - 历史账套数据库（加密）
-  - RAG向量库（企业隔离）
-  - 本地LLM（Qwen2.5-72B / GLM-4）
-  - OCR服务（本地GPU）
-  - 规则引擎 + 异常检测模型
-云端API（按需）:
-  - GPT-4 / Claude（仅复杂推理）
-  - 数据脱敏后调用</pre>
-            </div>
-          </div>
-        </div>
-
-        <!-- Slide 23: 8.7 Human-AI -->
-        <div class="slide" data-index="22">
-          <div class="section-number">09</div>
-          <h2>AI维度深化分析</h2>
-          <h3><span class="badge badge-blue">8.7</span> 人机协作流程设计</h3>
-
-          <div class="card">
-            <h4>8.7.1 置信度分级机制</h4>
-            <table class="data-table">
-              <thead><tr><th>置信度</th><th>自动化程度</th><th>人工介入</th><th>示例</th></tr></thead>
-              <tbody>
-                <tr><td><strong>&ge;95%</strong></td><td>自动执行</td><td>事后抽查</td><td>标准进项发票分录、银行流水匹配</td></tr>
-                <tr><td><strong>80-94%</strong></td><td>AI推荐</td><td>一键确认/修改</td><td>常规费用报销分录、常规成本结转</td></tr>
-                <tr><td><strong>60-79%</strong></td><td>AI推荐</td><td>必须人工审核</td><td>复杂往来分录、非标准业务</td></tr>
-                <tr><td><strong>&lt;60%</strong></td><td>直接转人工</td><td>人工从零处理</td><td>手写承兑汇票、异常复杂业务</td></tr>
-              </tbody>
-            </table>
-          </div>
-
-          <div class="two-col">
-            <div class="card">
-              <h4>8.7.2 审核工作台设计</h4>
-              <ul>
-                <li><strong>对比视图：</strong>左侧AI推荐，右侧原始票据，差异高亮</li>
-                <li><strong>依据展示：</strong>AI为什么这样推荐（触发规则、参考历史案例）</li>
-                <li><strong>快捷操作：</strong>一键接受/拒绝并选原因/快速修改</li>
-                <li><strong>批量处理：</strong>同类异常可批量修正</li>
-                <li><strong>反馈收集：</strong>人工修正原因自动记录，回流训练数据</li>
-              </ul>
-            </div>
-            <div class="card">
-              <h4>8.7.3 会计人员能力模型转变</h4>
-              <table class="data-table">
-                <thead><tr><th>传统角色</th><th>AI时代角色</th><th>能力要求变化</th></tr></thead>
-                <tbody>
-                  <tr><td>手工录入员</td><td>数据质量监督员</td><td>打字速度 &rarr; 数据质量判断</td></tr>
-                  <tr><td>做账会计</td><td>AI训练师+审核员</td><td>记忆科目 &rarr; 定义规则、修正AI</td></tr>
-                  <tr><td>税务申报员</td><td>税务策略顾问</td><td>操作申报 &rarr; 税务筹划、风险把控</td></tr>
-                  <tr><td>报告撰写员</td><td>报告分析师</td><td>排版填数 &rarr; 业务洞察、客户沟通</td></tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-
-        <!-- Slide 24: 8.8 Metrics -->
-        <div class="slide" data-index="23">
-          <div class="section-number">09</div>
-          <h2>AI维度深化分析</h2>
-          <h3><span class="badge badge-yellow">8.8</span> 评估指标与反馈闭环</h3>
-
-          <div class="card">
-            <h4>8.8.1 AI效果评估指标体系</h4>
-            <table class="data-table">
-              <thead><tr><th>指标</th><th>定义</th><th>目标值</th><th>测量方式</th></tr></thead>
-              <tbody>
-                <tr><td>科目推荐准确率</td><td>Top-1推荐等于人工选择的比率</td><td>&ge;85%</td><td>每月抽样100笔审核数据</td></tr>
-                <tr><td>科目推荐Top-3命中率</td><td>正确科目在Top-3中的比率</td><td>&ge;95%</td><td>同上</td></tr>
-                <tr><td>OCR字段准确率</td><td>识别字段与人工录入一致的比率</td><td>&ge;95%（机打）/&ge;80%（手写）</td><td>随机抽样200张票据</td></tr>
-                <tr><td>异常检测精确率</td><td>预警中真实异常的比例</td><td>&ge;70%</td><td>人工标注预警样本</td></tr>
-                <tr><td>异常检测召回率</td><td>真实异常中被预警的比例</td><td>&ge;90%</td><td>同上</td></tr>
-                <tr><td>AI处理占比</td><td>由AI自动完成（无需人工）的业务比例</td><td>&ge;60%</td><td>统计月度凭证数据</td></tr>
-                <tr><td>人工审核耗时</td><td>单笔凭证平均审核时间</td><td>&le;30秒</td><td>系统埋点统计</td></tr>
-                <tr><td>客户满意度</td><td>客户对账务质量的评分</td><td>&ge;4.5/5</td><td>季度问卷</td></tr>
-              </tbody>
-            </table>
-          </div>
-
-          <div class="card">
-            <h4>8.8.2 数据飞轮（Feedback Loop）</h4>
-            <pre>
-        &#9484;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9488;
-        &#9474;   &#21382;&#21490;&#25968;&#25454;   &#9474;
-        &#9484;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9524;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9488;
-        &#9474;             &#8595;         &#9474;
-        &#9474;        &#9484;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9488;   &#9474;
-        &#9474;        &#9474;  &#35757;&#32451;&#27169;&#22411;   &#9474;   &#9474;
-        &#9474;        &#9484;&#9472;&#9472;&#9472;&#9524;&#9472;&#9472;&#9472;&#9488;   &#9474;
-        &#9474;        &#8595;       &#8595;       &#9474;
-        &#9474;   &#9484;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9488;   &#9484;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9488;   &#9474;
-        &#9474;   &#9474;  AI &#25512;&#29702;    &#9474;&#9472;&#9472;&#9472;&#9472;&#8594;&#9474;  &#20154;&#24037;&#23457;&#26680;   &#9474;   &#9474;
-        &#9474;   &#9484;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9524;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9488;   &#9484;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9524;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9488;   &#9474;
-        &#9474;   &#8593;                      &#8595;             &#9474;
-        &#9474;   &#9492;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9524;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9488;
-        &#9474;                            &#8595;           &#9474;
-        &#9474;                     &#9484;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9488;
-        &#9492;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#8594;&#9474; &#20462;&#27491;&#25968;&#25454;&#22238;&#27969;  &#9474;
-                              &#9492;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9496;</pre>
-            <ul>
-              <li>每次人工修正自动记录修正原因</li>
-              <li>每周自动聚类高频修正模式，触发规则/模型优化</li>
-              <li>每月用新增修正数据增量微调模型</li>
-              <li>每季度全面评估指标体系，调整阈值和策略</li>
+            <div class="badge badge-pink">需要向客户了解的问题</div>
+            <ul class="list">
+              <li>是否接受"OCR提取 + 人工逐张确认"的半自动模式？</li>
+              <li>识别错误导致后续账务出错，责任如何界定？</li>
+              <li>是否需要保留原始图片作为法律凭证？</li>
+              <li>除发票、对账单、承兑票据外，还有哪些特殊单据需识别？</li>
             </ul>
           </div>
         </div>
+        <div class="highlight-box">
+          <strong>关键数据：</strong>收资料环节消耗约20%工作量，OCR识别准确率是后续自动化的基础。建议承兑票据OCR准确率目标 ≥ 95%。
+        </div>
+      </div>
 
-        <!-- Slide 25: 8.9 Cost -->
-        <div class="slide" data-index="24">
-          <div class="section-number">09</div>
-          <h2>AI维度深化分析</h2>
-          <h3><span class="badge badge-orange">8.9</span> 算力与成本估算</h3>
-
-          <div class="two-col">
-            <div class="card">
-              <h4>8.9.1 模型部署成本对比</h4>
-              <table class="data-table">
-                <thead><tr><th>方案</th><th>适用规模</th><th>初始投入</th><th>月均成本</th></tr></thead>
-                <tbody>
-                  <tr><td>纯云端API</td><td>&lt;100家企业</td><td>低</td><td>&yen;8,000-15,000</td></tr>
-                  <tr><td><strong>混合方案（推荐）</strong></td><td>100-500家</td><td>中</td><td>&yen;5,000-10,000</td></tr>
-                  <tr><td>全本地部署</td><td>&gt;500家</td><td>高（&yen;15-30万GPU）</td><td>&yen;3,000-5,000</td></tr>
-                </tbody>
-              </table>
-            </div>
-            <div class="card">
-              <h4>8.9.2 算力需求估算（混合方案）</h4>
-              <table class="data-table">
-                <thead><tr><th>组件</th><th>配置</th><th>用途</th></tr></thead>
-                <tbody>
-                  <tr><td>OCR服务</td><td>2&times; RTX 4090 / A10</td><td>票据实时识别</td></tr>
-                  <tr><td>Embedding + RAG</td><td>1&times; RTX 3090</td><td>向量检索、轻量推理</td></tr>
-                  <tr><td>本地LLM</td><td>1&times; A100 80GB</td><td>Qwen2.5-72B / GLM-4-9B</td></tr>
-                  <tr><td>规则引擎+统计模型</td><td>CPU即可</td><td>异常检测、成本计算</td></tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-
+      <!-- ===== 第21页：调研分析-账务处理环节 ===== -->
+      <div class="slide">
+        <div class="slide-title">调研分析 · 账务处理环节</div>
+        <div class="slide-subtitle">工作量占比50%，核心——智能核算与自动做账</div>
+        <div class="grid-2">
           <div class="card">
-            <h4>8.9.3 Token消耗估算</h4>
-            <p>假设服务 <strong>300家企业</strong>，月均 <strong>5000笔</strong> 凭证：</p>
-            <ul>
-              <li>每笔凭证调用LLM 1次（科目推荐+摘要），平均2K input + 500 output</li>
-              <li>月消耗：5000 &times; 2.5K = <strong>12.5M tokens</strong></li>
-              <li>GPT-4 API成本：约 <strong>&yen;3,000-5,000/月</strong></li>
-              <li>国产大模型API（通义/文心）：约 <strong>&yen;1,500-2,500/月</strong></li>
+            <div class="badge badge-red">研究方向</div>
+            <ul class="list">
+              <li>成本结转规则引擎：按品类/批次/加权平均/先进先出等规则，允许客户配置</li>
+              <li>会计科目推荐模型：关键词匹配 vs 外部知识库/向量检索</li>
+              <li>预警系统规则设计：借贷不平、金额为负、无附件、供应商异常等</li>
+              <li>智能体加工模块：自动读取原始凭证 → 生成分录草稿 → 等待人工审核</li>
+            </ul>
+          </div>
+          <div class="card">
+            <div class="badge badge-blue">调研内容</div>
+            <ul class="list">
+              <li>典型企业类型占比（如60%商贸、30%生产制造）</li>
+              <li>常用科目树层级、末级科目数量</li>
+              <li>成本结转最大工作量集中点</li>
+              <li>客户对"自动推荐科目"的信任程度</li>
+              <li>是否有历史账套数据可用于训练</li>
+            </ul>
+          </div>
+          <div class="card">
+            <div class="badge badge-yellow">难点</div>
+            <ul class="list">
+              <li>会计科目归属没有绝对唯一标准，不同会计判断可能不同</li>
+              <li>成本结转涉及多个前置单据，若无数据无法真正自动化</li>
+              <li>预警规则过严产生大量误报，过松则失去意义</li>
+              <li>智能体模块本质是工作流引擎，复杂度较高</li>
+            </ul>
+          </div>
+          <div class="card">
+            <div class="badge badge-pink">需要向客户了解的问题</div>
+            <ul class="list">
+              <li>是否接受"系统只生成建议分录，必须会计审核后方可过账"？</li>
+              <li>成本结转规则是否可由客户财务经理自行配置？</li>
+              <li>若无规范出入库数据，是否接受手工补录后再结转？</li>
+              <li>账务处理速度要求：每月5号前完成，系统能压缩到几天？</li>
+              <li>是否愿意提供过去一年脱敏凭证数据建立规则库？</li>
             </ul>
           </div>
         </div>
-
-        <!-- Slide 26: 8.10 Roadmap -->
-        <div class="slide" data-index="25">
-          <div class="section-number">09</div>
-          <h2>AI维度深化分析</h2>
-          <h3><span class="badge badge-green">8.10</span> AI实施路线图</h3>
-
-          <div class="card">
-            <h4>8.10.1 分阶段落地策略</h4>
-            <table class="data-table">
-              <thead><tr><th>阶段</th><th>周期</th><th>目标</th><th>核心AI工作</th></tr></thead>
-              <tbody>
-                <tr><td><strong>Phase 0：基建</strong></td><td>1-2月</td><td>数据就绪</td><td>历史账套脱敏清洗；科目库标准化；票据OCR POC；向量数据库搭建</td></tr>
-                <tr><td><strong>Phase 1：单点突破</strong></td><td>2-3月</td><td>一个环节跑通</td><td>增值税发票自动识别&rarr;分录生成（规则为主）；银行流水自动匹配；人工审核工作台上线</td></tr>
-                <tr><td><strong>Phase 2：核心智能化</strong></td><td>3-4月</td><td>AI辅助做账</td><td>科目推荐模型上线（RAG+LLM）；异常检测规则库完善；成本结转参数化引擎</td></tr>
-                <tr><td><strong>Phase 3：税务自动化</strong></td><td>2-3月</td><td>开票+申报自动化</td><td>电子税务局RPA/API对接；申报数据自动校验；批量申报引擎</td></tr>
-                <tr><td><strong>Phase 4：风控+分析</strong></td><td>2-3月</td><td>增值能力</td><td>风险预警模型调优；经营分析报告NLG；行业对标数据接入</td></tr>
-                <tr><td><strong>Phase 5：持续进化</strong></td><td>持续</td><td>数据飞轮</td><td>每月增量微调；新行业适配；人机协作效率优化</td></tr>
-              </tbody>
-            </table>
-          </div>
-
-          <div class="card">
-            <h4>8.10.2 团队配置建议</h4>
-            <table class="data-table">
-              <thead><tr><th>角色</th><th>人数</th><th>职责</th></tr></thead>
-              <tbody>
-                <tr><td><strong>AI产品经理</strong></td><td>1</td><td>需求梳理、效果评估、人机流程设计</td></tr>
-                <tr><td><strong>算法工程师</strong></td><td>2</td><td>OCR优化、LLM微调、RAG搭建、异常检测模型</td></tr>
-                <tr><td><strong>后端工程师</strong></td><td>3</td><td>Agent架构、规则引擎、数据pipeline、API对接</td></tr>
-                <tr><td><strong>财务业务专家</strong></td><td>2</td><td>规则定义、数据标注、效果验收、客户沟通</td></tr>
-                <tr><td><strong>数据工程师</strong></td><td>1</td><td>数据清洗、ETL、向量库维护</td></tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        <!-- Slide 27: 8.11 Risks -->
-        <div class="slide" data-index="26">
-          <div class="section-number">09</div>
-          <h2>AI维度深化分析</h2>
-          <h3><span class="badge badge-red">8.11</span> 关键风险与对策（AI专项）</h3>
-
-          <div class="card">
-            <table class="data-table">
-              <thead><tr><th>风险</th><th>影响</th><th>对策</th></tr></thead>
-              <tbody>
-                <tr><td><strong>AI幻觉导致错误凭证</strong></td><td>高（税务处罚）</td><td>禁止AI直接生成最终凭证；所有输出经人工审核；建立校验规则</td></tr>
-                <tr><td><strong>模型过拟合特定企业</strong></td><td>中（新企业效果差）</td><td>保留通用基线模型；新企业前3个月用通用模型</td></tr>
-                <tr><td><strong>政策法规变化导致失效</strong></td><td>中（申报错误）</td><td>政策单独维护；申报前强制读取最新政策库</td></tr>
-                <tr><td><strong>数据泄露</strong></td><td>高（信任危机）</td><td>敏感数据本地化；云端调用前脱敏；签署DPA</td></tr>
-                <tr><td><strong>AI效果不及预期导致抵触</strong></td><td>中（推广困难）</td><td>先易后难；让会计参与规则制定；量化提效成果</td></tr>
-                <tr><td><strong>LLM API成本不可控</strong></td><td>中（运营亏损）</td><td>高频场景用本地模型；缓存相似查询；设置预算上限</td></tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        <!-- Slide 28: Summary -->
-        <div class="slide" data-index="27">
-          <div class="section-number">10</div>
-          <h2>总结：AI不是银弹，是杠杆</h2>
-
-          <div class="cover-content" style="padding:20px 0">
-            <p style="font-size:16px;margin-bottom:24px">财务代账系统的AI化，核心不在于用AI取代会计，而在于<strong>用AI放大会计的专业价值</strong>：</p>
-
-            <div class="grid-2">
-              <div class="card green-bg">
-                <h3>AI做 70% 的标准化工作</h3>
-                <p>&rarr; 释放会计时间</p>
-              </div>
-              <div class="card blue-bg">
-                <h3>会计做 30% 的判断性工作</h3>
-                <p>&rarr; 创造更高价值</p>
-              </div>
-              <div class="card yellow-bg">
-                <h3>数据飞轮持续积累</h3>
-                <p>&rarr; 系统越用越聪明</p>
-              </div>
-              <div class="card pink-bg">
-                <h3>人机协作闭环</h3>
-                <p>&rarr; 错误率持续下降，客户满意度持续上升</p>
-              </div>
-            </div>
-
-            <div class="card" style="margin-top:24px">
-              <h3>下一步AI专项工作重点</h3>
-              <ol>
-                <li><strong>立即启动：</strong>历史账套数据脱敏与清洗，建立训练数据集</li>
-                <li><strong>本月完成：</strong>OCR厂商POC（100张承兑票据），明确手写体识别天花板</li>
-                <li><strong>本月完成：</strong>LLM科目推荐POC（用500条历史分录测试基线准确率）</li>
-                <li><strong>下月启动：</strong>RAG知识库搭建（会计科目库 + 政策法规库 + 历史案例库）</li>
-                <li><strong>持续进行：</strong>财务业务专家与算法团队的规则对齐工作坊</li>
-              </ol>
-            </div>
-
-            <div class="highlight-box" style="margin-top:24px">
-              <strong>PROJ-2026-003</strong> &middot; 财务代账作业平台智能化系统建设方案 &middot; 2026年5月
-            </div>
-          </div>
-        </div>
-
       </div>
 
-      <div id="bottomBar">
-        <button class="nav-btn" id="prevBtn" disabled>&larr; 上一页</button>
-        <button class="nav-btn" id="nextBtn">下一页 &rarr;</button>
+      <!-- ===== 第22页：调研分析-开发票环节 ===== -->
+      <div class="slide">
+        <div class="slide-title">调研分析 · 开发票环节</div>
+        <div class="slide-subtitle">非核心占比，但影响体验——一站式智能开票</div>
+        <div class="grid-2">
+          <div class="card">
+            <div class="badge badge-red">研究方向</div>
+            <ul class="list">
+              <li>电子税务局接口可行性：各地是否提供开放API？大部分需RPA或第三方税控服务商接口</li>
+              <li>扫码登录技术实现（扫脸/企业码）</li>
+              <li>发票模板与业务单据的映射关系</li>
+            </ul>
+          </div>
+          <div class="card">
+            <div class="badge badge-blue">调研内容</div>
+            <ul class="list">
+              <li>目前为多少家企业代开发票，每月平均开票量</li>
+              <li>税控设备类型（税务UKey、税控盘）及托管情况</li>
+              <li>是否接受第三方电子发票服务平台（可能有额外费用）</li>
+              <li>开票内容是否固定还是高度变化</li>
+            </ul>
+          </div>
+          <div class="card">
+            <div class="badge badge-yellow">难点</div>
+            <ul class="list">
+              <li>各地电子税务局接口不稳定，政策变化频繁，自行对接维护成本极高</li>
+              <li>RPA方式容易被验证码、滑块、人脸识别阻断，可靠性不足</li>
+              <li>红字发票、作废、冲红等异常流程难以全自动化</li>
+            </ul>
+          </div>
+          <div class="card">
+            <div class="badge badge-pink">需要向客户了解的问题</div>
+            <ul class="list">
+              <li>是否允许集成第三方成熟电子发票API（诺诺网、百望云）？预算是否覆盖？</li>
+              <li>自动开票失败，是否可降级为"生成待开票数据文件，人工导入"？</li>
+              <li>开票环节是否需要反向更新到账务处理（如自动生成应收账款凭证）？</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== 第23页：调研分析-税务申报环节 ===== -->
+      <div class="slide">
+        <div class="slide-title">调研分析 · 税务申报环节</div>
+        <div class="slide-subtitle">非核心占比，但风险最高——批量智能申报</div>
+        <div class="grid-2">
+          <div class="card">
+            <div class="badge badge-red">研究方向</div>
+            <ul class="list">
+              <li>批量申报可行性：RPA逐个登录 vs 税务局备案接口（需代理商资质）</li>
+              <li>申报前校验逻辑：收入与增值税申报表一致性、进项税匹配、利润与所得税钩稽</li>
+              <li>数据提取范围：科目余额表、纳税调整表、发票汇总表等自动生成申报表</li>
+            </ul>
+          </div>
+          <div class="card">
+            <div class="badge badge-blue">调研内容</div>
+            <ul class="list">
+              <li>服务企业的税种及申报频率</li>
+              <li>目前申报错误/漏报的主要原因</li>
+              <li>是否允许系统生成XML/Excel由人工上传？还是必须全自动？</li>
+              <li>申报错误导致罚款，系统提供方是否承担责任？</li>
+            </ul>
+          </div>
+          <div class="card">
+            <div class="badge badge-yellow">难点</div>
+            <ul class="list">
+              <li>税务政策存在地域差异和时效性，规则需持续更新</li>
+              <li>批量申报需存储企业税务局账号密码，存在安全合规风险</li>
+              <li>税务局接口申请门槛高（通常要求涉税专业服务机构且备案）</li>
+            </ul>
+          </div>
+          <div class="card">
+            <div class="badge badge-pink">需要向客户了解的问题</div>
+            <ul class="list">
+              <li>是否接受"系统自动填报 + 生成预览表 + 人工一键提交"？</li>
+              <li>由谁管理各企业电子税务局登录凭证？系统是否可用保险柜模块存储？</li>
+              <li>税务局接口变更导致申报失败，是否接受人工应急处理？</li>
+              <li>是否已有其他申报辅助软件？为何不满意？</li>
+            </ul>
+          </div>
+        </div>
+        <div class="highlight-box" style="background:var(--pink); color:white;">
+          <strong>风险提示：</strong>税务申报是风险最高的环节，建议首期采用"半自动"模式（系统生成 + 人工确认），避免全自动申报带来的合规风险。
+        </div>
+      </div>
+
+      <!-- ===== 第24页：调研分析-凭证处理环节 ===== -->
+      <div class="slide">
+        <div class="slide-title">调研分析 · 凭证处理环节</div>
+        <div class="slide-subtitle">工作量占比20%——电子凭证簿管理</div>
+        <div class="grid-2">
+          <div class="card">
+            <div class="badge badge-red">研究方向</div>
+            <ul class="list">
+              <li>电子凭证生成：记账凭证 + 原始单据图片汇总为PDF/OFD</li>
+              <li>在线归档目录结构（按企业-年度-月份-凭证号）</li>
+              <li>与打印、装订、邮寄供应商对接可能性</li>
+            </ul>
+          </div>
+          <div class="card">
+            <div class="badge badge-blue">调研内容</div>
+            <ul class="list">
+              <li>每月生成多少本凭证，每本平均厚度</li>
+              <li>打印装订具体要求（封面格式、针式打印、打孔位置）</li>
+              <li>是否必须保留纸质档案满足审计/法律要求</li>
+              <li>是否已有合作打印寄送外包商</li>
+            </ul>
+          </div>
+          <div class="card">
+            <div class="badge badge-yellow">难点</div>
+            <ul class="list">
+              <li>电子凭证法律效力：需了解所在地是否允许电子会计凭证归档</li>
+              <li>自动排版时原始图片可能模糊、颠倒、重复</li>
+              <li>邮寄地址管理频繁变动</li>
+            </ul>
+          </div>
+          <div class="card">
+            <div class="badge badge-pink">需要向客户了解的问题</div>
+            <ul class="list">
+              <li>是否愿意完全放弃纸质凭证，改为加密电子光盘或云归档？</li>
+              <li>如必须保留纸质，是否接受"系统生成打印清单和封面，客户自行打印装订"？</li>
+              <li>未来3年是否采用电子会计档案合规模式？</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== 第25页：调研分析-经营分析报告 ===== -->
+      <div class="slide">
+        <div class="slide-title">调研分析 · 经营分析报告</div>
+        <div class="slide-subtitle">非核心占比，但增值——业财税一体化分析</div>
+        <div class="grid-2">
+          <div class="card">
+            <div class="badge badge-red">研究方向</div>
+            <ul class="list">
+              <li>标准化指标库：资产负债率、毛利率、应收账款周转率、现金流结构及行业对比数据来源</li>
+              <li>报告模板设计：可配置段落、图表、文字解释模板</li>
+              <li>数据接口：从账务系统抓取财务报表、科目余额、辅助核算</li>
+            </ul>
+          </div>
+          <div class="card">
+            <div class="badge badge-blue">调研内容</div>
+            <ul class="list">
+              <li>目前提供给企业主的报告样例，哪些部分最受重视</li>
+              <li>企业主常见提问（如"为何利润下滑""哪个产品赚钱"）</li>
+              <li>是否接受报告完全由系统自动生成不修改</li>
+              <li>是否需支持不同行业不同分析重点</li>
+            </ul>
+          </div>
+          <div class="card">
+            <div class="badge badge-yellow">难点</div>
+            <ul class="list">
+              <li>分析结论不能过于笼统，需结合业务数据，但业务数据往往不在财务系统中</li>
+              <li>若无预算或去年同期数据，无法做同比/环比</li>
+              <li>报告建议部分如错误，可能误导客户决策，带来责任风险</li>
+            </ul>
+          </div>
+          <div class="card">
+            <div class="badge badge-pink">需要向客户了解的问题</div>
+            <ul class="list">
+              <li>是否可以先只做"数据可视化仪表板"，而不自动生成带文字结论的报告？</li>
+              <li>客户是否愿意为每个企业补充行业代码和经营数据提升分析质量？</li>
+              <li>系统生成的结论错了，客户是否会要求承担咨询责任？</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== 第26页：调研分析-风险预警系统 ===== -->
+      <div class="slide">
+        <div class="slide-title">调研分析 · 风险预警系统</div>
+        <div class="slide-subtitle">额外需求——智能风控引擎覆盖多维度异常监测</div>
+        <div class="grid-2">
+          <div class="card">
+            <div class="badge badge-red">研究方向</div>
+            <ul class="list">
+              <li>多维度预警配置：连续2个月毛利率下降超10%、单笔报销超5万、应付逾期30天以上等</li>
+              <li>实时监测方案：每日定时扫描 vs 每次数据导入触发</li>
+              <li>提醒方式：站内信、邮件、钉钉/企微机器人</li>
+              <li>异常分析提示：关联到具体科目、凭证、原始图片</li>
+            </ul>
+          </div>
+          <div class="card">
+            <div class="badge badge-blue">调研内容</div>
+            <ul class="list">
+              <li>最常遇到的财务异常场景（存货账实不符、往来长期挂账、税负率异常）</li>
+              <li>是否需对不同企业设置不同预警阈值</li>
+              <li>预警产生后，由系统指派任务还是仅通知</li>
+              <li>是否希望与税务局纳税风险提示对接（难度极大）</li>
+            </ul>
+          </div>
+          <div class="card">
+            <div class="badge badge-yellow">难点</div>
+            <ul class="list">
+              <li>预警规则一旦设定，可能出现大量无效预警，导致客户关闭功能</li>
+              <li>部分异常需跨期间数据，初期缺乏历史数据无法判断</li>
+              <li>"实时监测"对系统性能要求较高，管理一千家以上企业时压力大</li>
+            </ul>
+          </div>
+          <div class="card">
+            <div class="badge badge-pink">需要向客户了解的问题</div>
+            <ul class="list">
+              <li>是否愿意分阶段建设：首期只做3-5项最核心预警？</li>
+              <li>是否有专人处理预警，还是希望系统自动处理？</li>
+              <li>预警误报是否会损害客户对系统的信任？</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== 第27页：系统架构-功能架构图 ===== -->
+      <div class="slide">
+        <div class="slide-title">系统架构 · 功能架构图</div>
+        <img src="功能架构图.png" style="max-width:100%; max-height:calc(100vh - 160px); object-fit:contain; display:block; margin:0 auto; border:4px solid var(--black); box-shadow:var(--shadow);">
+      </div>
+
+      <!-- ===== 第28页：系统架构-业务架构图 ===== -->
+      <div class="slide">
+        <div class="slide-title">系统架构 · 业务架构图</div>
+        <img src="业务架构图.png" style="max-width:100%; max-height:calc(100vh - 160px); object-fit:contain; display:block; margin:0 auto; border:4px solid var(--black); box-shadow:var(--shadow);">
+      </div>
+
+      <!-- ===== 第29页：系统架构-功能清单 ===== -->
+      <div class="slide">
+        <div class="slide-title">系统架构 · 功能清单</div>
+        <div class="slide-subtitle">10大模块，40+功能点</div>
+        <div style="display:flex; flex-wrap:wrap; gap:6px; margin-bottom:12px;">
+          <span class="badge badge-blue">票据管理（4项）</span>
+          <span class="badge badge-red">智能核算（5项）</span>
+          <span class="badge badge-yellow">数电发票（3项）</span>
+          <span class="badge badge-pink">税务申报（5项）</span>
+          <span class="badge badge-orange">凭证账簿（4项）</span>
+          <span class="badge badge-blue">经营分析（4项）</span>
+          <span class="badge badge-red">风险预警（4项）</span>
+          <span class="badge badge-yellow">AI智能体（4项）</span>
+          <span class="badge badge-pink">客户管理（3项）</span>
+          <span class="badge badge-orange">系统管理（2项）</span>
+        </div>
+        <table class="data-table" style="font-size:12px;">
+          <thead><tr><th>一级菜单</th><th>二级菜单</th><th>核心操作</th></tr></thead>
+          <tbody>
+            <tr><td rowspan="4">票据管理</td><td>票据采集</td><td>OCR扫描→识别→录入→详情→编辑确认</td></tr>
+            <tr><td>承兑票据处理</td><td>上传扫描件→OCR提取→录入→同步票据库</td></tr>
+            <tr><td>银行回单采集</td><td>账户授权→RPA查询→自动录入→编辑确认</td></tr>
+            <tr><td>票据台账</td><td>查询→详情→批量导出/删除</td></tr>
+            <tr><td rowspan="3">智能核算</td><td>自动记账</td><td>规则模板新增/编辑→执行→详情→审核</td></tr>
+            <tr><td>AI成本结转</td><td>分摊规则→存货台账→成本结转凭证</td></tr>
+            <tr><td>科目辅助</td><td>智能推荐→审核选择→新增/编辑映射</td></tr>
+            <tr><td rowspan="2">税务申报</td><td>一键申报</td><td>查询→预览→提交→查询结果</td></tr>
+            <tr><td>批量申报</td><td>批量勾选→创建任务→无人值守执行</td></tr>
+            <tr><td>AI智能体</td><td>快捷任务</td><td>自然语言指令→社保查询/发票查验/批量报税RPA</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- ===== 第30页：AI维度深化分析-总览 ===== -->
+      <div class="slide">
+        <div class="slide-title">AI维度深化分析 · 总览</div>
+        <div class="slide-subtitle">六大AI能力模块，从单点智能到全链路赋能</div>
+        <div class="grid-3">
+          <div class="card" style="border-left:6px solid var(--red);">
+            <div style="font-size:15px; font-weight:900; margin-bottom:6px;">AI成本结转</div>
+            <p style="font-size:12px; line-height:1.5;">针对生产制造/商贸企业，支持原材料、人工、制造费用自动分摊，自动生成存货台账与成本结转凭证。</p>
+          </div>
+          <div class="card" style="border-left:6px solid var(--blue);">
+            <div style="font-size:15px; font-weight:900; margin-bottom:6px;">科目辅助推荐</div>
+            <p style="font-size:12px; line-height:1.5;">基于行业特性与业务类型自动推荐会计科目，构建行业-科目映射知识图谱。</p>
+          </div>
+          <div class="card" style="border-left:6px solid var(--yellow);">
+            <div style="font-size:15px; font-weight:900; margin-bottom:6px;">AI智能体</div>
+            <p style="font-size:12px; line-height:1.5;">嵌入企业微信侧边栏，自然语言驱动：社保查询、发票查验、账务调整、批量报税RPA。</p>
+          </div>
+          <div class="card" style="border-left:6px solid var(--pink);">
+            <div style="font-size:15px; font-weight:900; margin-bottom:6px;">7×24h风险扫描</div>
+            <p style="font-size:12px; line-height:1.5;">预设100+风险点位，内置动态财税知识图谱与全国政策库，AI实时解析法规，主动预警处置。</p>
+          </div>
+          <div class="card" style="border-left:6px solid var(--orange);">
+            <div style="font-size:15px; font-weight:900; margin-bottom:6px;">财税垂类大模型</div>
+            <p style="font-size:12px; line-height:1.5;">政策实时解析、行业规则匹配、智能问答。基于2.62亿+多维参数ML模型，持续优化。</p>
+          </div>
+          <div class="card" style="border-left:6px solid var(--red);">
+            <div style="font-size:15px; font-weight:900; margin-bottom:6px;">端到端自动化</div>
+            <p style="font-size:12px; line-height:1.5;">收资料→账务处理→申报→风险预警→报告，跨环节智能体协作，形成全流程自动化闭环。</p>
+          </div>
+        </div>
+        <div class="speech-bubble" style="background:var(--yellow); color:var(--black);">
+          核心目标：单名会计服务客户数从200-300家提升至400-500家，效率提升超50%。
+        </div>
+      </div>
+
+      <!-- ===== 第31页：AI维度-AI成本结转 ===== -->
+      <div class="slide">
+        <div class="slide-title">AI维度 · AI成本结转</div>
+        <div class="slide-subtitle">解决生产制造/商贸企业成本核算规则复杂、工作量大的核心痛点</div>
+        <div class="grid-2">
+          <div class="card">
+            <div class="badge badge-red">痛点背景</div>
+            <p style="margin-top:8px; font-size:13px; line-height:1.6;">生产制造/商贸企业的成本核算规则复杂，涉及多种成本核算方法及间接费用分摊逻辑，成本结转工作量大，高度依赖会计专业水平。</p>
+          </div>
+          <div class="card">
+            <div class="badge badge-blue">解决方案</div>
+            <p style="margin-top:8px; font-size:13px; line-height:1.6;">开发专属成本核算功能，支持原材料、人工、制造费用等自动分摊，自动生成存货台账，实现多行业专属配置。</p>
+          </div>
+          <div class="card">
+            <div class="badge badge-yellow">核心能力</div>
+            <ul class="list">
+              <li>支持品种法/分批法/分步法等多种成本核算方法</li>
+              <li>间接费用自动分摊与归集</li>
+              <li>自动生成成本结转凭证</li>
+              <li>多行业预设规则库</li>
+            </ul>
+          </div>
+          <div class="card">
+            <div class="badge badge-pink">实现路径</div>
+            <ul class="list">
+              <li>调研各行业成本核算SOP</li>
+              <li>构建成本归集与分摊规则库</li>
+              <li>结合行业经验开发预设规则</li>
+              <li>持续迭代优化规则准确性</li>
+            </ul>
+          </div>
+        </div>
+        <div class="highlight-box">难度等级：★★★★☆ 较高。需深度调研并结合行业经验开发预设规则库。</div>
+      </div>
+
+      <!-- ===== 第32页：AI维度-科目辅助推荐 ===== -->
+      <div class="slide">
+        <div class="slide-title">AI维度 · 会计科目辅助推荐</div>
+        <div class="slide-subtitle">解决科目归属不统一、高度依赖会计水平的问题</div>
+        <div class="grid-2">
+          <div class="card">
+            <div class="badge badge-red">核心逻辑</div>
+            <p style="margin-top:8px; font-size:13px; line-height:1.6;">基于企业行业分类、业务流水的语义分析，系统基于行业特性与业务类型自动推荐会计科目，人工审核选择，支持手动新增/编辑科目映射规则。</p>
+          </div>
+          <div class="card">
+            <div class="badge badge-blue">知识图谱</div>
+            <p style="margin-top:8px; font-size:13px; line-height:1.6;">构建行业-科目映射知识图谱，覆盖常见票据对应凭证规则（发票、费用、工资、银行回单），实现业务类型到会计科目的智能匹配。</p>
+          </div>
+          <div class="card">
+            <div class="badge badge-yellow">数据支撑</div>
+            <p style="margin-top:8px; font-size:13px; line-height:1.6;">接入大数据科目辅助引擎，基于2.62亿+多维参数ML模型，持续学习优化推荐准确率。模型参数广泛而多样化，能根据不同企业类型自动适配财税处理规则。</p>
+          </div>
+          <div class="card">
+            <div class="badge badge-pink">应用效果</div>
+            <p style="margin-top:8px; font-size:13px; line-height:1.6;">解决科目归属标准不统一的问题，降低对会计专业水平的依赖，使账务处理从"人工主导"转变为"AI主导、人工审核"。</p>
+          </div>
+        </div>
+        <div class="highlight-box">难度等级：★★★☆☆ 中等。难度取决于业务场景的覆盖面。</div>
+      </div>
+
+      <!-- ===== 第33页：AI维度-AI智能体 ===== -->
+      <div class="slide">
+        <div class="slide-title">AI维度 · AI智能体（"龙虾助理"）</div>
+        <div class="slide-subtitle">嵌入企业微信侧边栏，自然语言驱动一站式财税操作</div>
+        <div class="grid-2">
+          <div class="card">
+            <div class="badge badge-red">嵌入方式</div>
+            <p style="margin-top:8px; font-size:13px; line-height:1.6;">将AI Agent嵌入会计日常工作界面（企业微信侧边栏），会计登录企业微信后AI智能体自动嵌入侧边栏，支持自然语言输入任务，系统自动执行并返回结果。</p>
+          </div>
+          <div class="card">
+            <div class="badge badge-blue">快捷任务</div>
+            <p style="margin-top:8px; font-size:13px; line-height:1.6;">通过自然语言指令触发：社保查询、发票查验、账务编辑调整、批量报税RPA、税务报表生成。具体到批量报税：批量勾选企业→AI驱动RPA自动完成流程。</p>
+          </div>
+          <div class="card">
+            <div class="badge badge-yellow">人机协同</div>
+            <p style="margin-top:8px; font-size:13px; line-height:1.6;">AI承担标准化重复性工作（约70%），财税专家聚焦复杂账务调整、政策解读、风险研判、税务优化等高价值环节。会计从操作者转变为"哨兵"。</p>
+          </div>
+          <div class="card">
+            <div class="badge badge-pink">成本管理</div>
+            <p style="margin-top:8px; font-size:13px; line-height:1.6;">以Token消耗可视化推动成本精细化管理。查询Token消耗明细报表，支持分企业/分人员/分日期维度统计，详情展示消耗来源，支持成本分析。</p>
+          </div>
+        </div>
+        <div class="card" style="background:var(--blue); color:white;">
+          <div class="badge badge-yellow">任务调度</div>
+          <p style="margin-top:6px; font-size:13px; line-height:1.6;">新增定时执行任务（批量报税、批量生成报告等），查询任务执行状态，详情查看执行结果。支持跨环节智能体协作：收资料→账务处理→申报→风险预警→报告。</p>
+        </div>
+        <div class="highlight-box">难度等级：★★★★☆ 较高。核心难点在于Agent技能封装与数据安全隔离。</div>
+      </div>
+
+      <!-- ===== 第34页：AI维度-7×24h风险扫描 ===== -->
+      <div class="slide">
+        <div class="slide-title">AI维度 · 7×24h风险扫描</div>
+        <div class="slide-subtitle">预设100+风险点位，主动预警、主动处置</div>
+        <div class="grid-2">
+          <div class="card">
+            <div class="badge badge-red">风险点位配置</div>
+            <p style="margin-top:8px; font-size:13px; line-height:1.6;">新增/编辑风险监测规则（税负率异常/成本波动/现金红字/费用超标等100+点位可配置），设置预警阈值，详情查看规则。</p>
+          </div>
+          <div class="card">
+            <div class="badge badge-blue">实时监测</div>
+            <p style="margin-top:8px; font-size:13px; line-height:1.6;">系统自动运行风险扫描任务，查询企业风险状态（绿色安全/黄色提示/红色预警），自动推送预警消息。AI风险扫描7×24小时在线。</p>
+          </div>
+          <div class="card">
+            <div class="badge badge-yellow">知识图谱支撑</div>
+            <p style="margin-top:8px; font-size:13px; line-height:1.6;">内置动态财税知识图谱与全国政策库，实时解析最新财税法规，自动匹配行业合规标准。实时同步最新财税法规，自动匹配行业资质标准。</p>
+          </div>
+          <div class="card">
+            <div class="badge badge-pink">异常分析</div>
+            <p style="margin-top:8px; font-size:13px; line-height:1.6;">查询风险异常案例列表，详情查看异常数据及分析说明，导出风险报告，人工跟进处理闭环。通过站内消息、邮件、短信提醒。</p>
+          </div>
+        </div>
+        <div class="highlight-box">难度等级：★★★☆☆ 中等。核心在于规则准确性调优与误报率的控制。</div>
+      </div>
+
+      <!-- ===== 第35页：AI维度-财税垂类大模型 ===== -->
+      <div class="slide">
+        <div class="slide-title">AI维度 · 财税垂类大模型</div>
+        <div class="slide-subtitle">政策实时解析、行业规则匹配、智能问答</div>
+        <div class="grid-2">
+          <div class="card">
+            <div class="badge badge-red">模型参数</div>
+            <p style="margin-top:8px; font-size:13px; line-height:1.6;">基于2.62亿+多维参数ML模型，广泛而多样化的模型参数使其能够根据不同企业类型自动适配财税处理规则。持续优化记账准确率与推荐效果。</p>
+          </div>
+          <div class="card">
+            <div class="badge badge-blue">政策实时解析</div>
+            <p style="margin-top:8px; font-size:13px; line-height:1.6;">内置动态财税知识图谱与全国政策库，实时解析最新财税法规，自动匹配行业合规标准。实时跟踪各地最新财税法规变化。</p>
+          </div>
+          <div class="card">
+            <div class="badge badge-yellow">行业规则匹配</div>
+            <p style="margin-top:8px; font-size:13px; line-height:1.6;">通过对海量财税政策文件、实务案例的深度学习，形成具备行业适配性的智能引擎，精准掌握行业财税规则与政策适配逻辑。</p>
+          </div>
+          <div class="card">
+            <div class="badge badge-pink">智能问答</div>
+            <p style="margin-top:8px; font-size:13px; line-height:1.6;">NLP语义理解，客户意图理解，智能客服。会计可通过自然语言询问政策问题、操作指引，系统自动给出精准解答。</p>
+          </div>
+        </div>
+        <div class="card" style="background:var(--yellow);">
+          <div class="badge badge-orange">技术路线演进</div>
+          <p style="margin-top:6px; font-size:13px; line-height:1.6;">慧算账自研财税垂直大模型，2026年4月选择与腾讯云ClawPro深度合作。从自研大模型到外部大模型接入的转变，反映出对成本结构的审慎考量——自研训练Token消耗高且准确率不稳定，直接Agent接入更具成本效益。</p>
+        </div>
+      </div>
+
+      <!-- ===== 第36页：AI维度-端到端流程自动化 ===== -->
+      <div class="slide">
+        <div class="slide-title">AI维度 · 端到端流程自动化</div>
+        <div class="slide-subtitle">跨环节智能体协作，形成全流程自动化闭环</div>
+        <div class="flowchart">
+          <div class="flow-row">
+            <div class="flow-node flow-start">收资料</div>
+            <div class="flow-arrow">→</div>
+            <div class="flow-node flow-action">账务处理</div>
+            <div class="flow-arrow">→</div>
+            <div class="flow-node flow-action">税务申报</div>
+            <div class="flow-arrow">→</div>
+            <div class="flow-node flow-decision">风险预警</div>
+            <div class="flow-arrow">→</div>
+            <div class="flow-node flow-end">经营报告</div>
+          </div>
+        </div>
+        <div class="grid-2">
+          <div class="card">
+            <div class="badge badge-red">流程串联</div>
+            <p style="margin-top:8px; font-size:13px; line-height:1.6;">票据采集→OCR识别→自动生成凭证→AI审核→期末结账→生成财报→一键报税→风控扫描→生成经营分析报告。各环节数据自动流转，无需人工重复录入。</p>
+          </div>
+          <div class="card">
+            <div class="badge badge-blue">AI横向赋能</div>
+            <p style="margin-top:8px; font-size:13px; line-height:1.6;">AI智能体在每个环节提供辅助：收资料时自动识别分类、做账时推荐科目、申报前审核数据、申报后扫描风险、期末生成分析报告。实现端到端智能化。</p>
+          </div>
+          <div class="card">
+            <div class="badge badge-yellow">人机裁决点</div>
+            <p style="margin-top:8px; font-size:13px; line-height:1.6;">在关键节点设置人工审核裁决：凭证生成后人工审核确认、申报前人工预览修正、风险预警后人工跟进处理。确保AI辅助而非替代人的专业判断。</p>
+          </div>
+          <div class="card">
+            <div class="badge badge-pink">持续优化</div>
+            <p style="margin-top:8px; font-size:13px; line-height:1.6;">基于实际业务数据持续优化各环节AI模型，规则引擎自我迭代，知识图谱动态更新，系统越用越智能，非标场景处理能力逐步增强。</p>
+          </div>
+        </div>
+        <div class="highlight-box" style="background:var(--pink); color:white;">
+          目标人效：单名会计服务客户数从200-300家提升至400-500家，效率提升超50%。AI承担约70%标准化工作，专家聚焦30%高价值非标场景。
+        </div>
+      </div>
+
+      <!-- ===== 第37页：建设难度 ===== -->
+      <div class="slide">
+        <div class="slide-title">建设难度评估</div>
+        <table class="data-table">
+          <thead><tr><th style="width:26%;">维度</th><th style="width:15%;">难度</th><th>说明</th></tr></thead>
+          <tbody>
+            <tr><td><strong>OCR票据识别</strong></td><td><span class="badge badge-yellow">★★★☆☆ 中等</span></td><td>常规发票识别成熟（98%+）；重点攻关承兑票据版面分析与字段提取，需定制化训练模型</td></tr>
+            <tr><td><strong>AI成本结转模块</strong></td><td><span class="badge badge-red">★★★★☆ 较高</span></td><td>成本核算规则复杂，涉及多种方法及间接费用分摊逻辑，需深度调研并开发预设规则库</td></tr>
+            <tr><td><strong>会计科目辅助推荐</strong></td><td><span class="badge badge-yellow">★★★☆☆ 中等</span></td><td>需构建行业-科目映射知识图谱，难度取决于业务场景覆盖面</td></tr>
+            <tr><td><strong>批量税务申报</strong></td><td><span class="badge badge-red">★★★★☆ 较高</span></td><td>各地电子税局接口不统一，维护量大；建议RPA与接口并行方案</td></tr>
+            <tr><td><strong>凭证电子归档</strong></td><td><span class="badge badge-blue">★★☆☆☆ 较低</span></td><td>技术成熟，主要是存储架构选型与权限合规设计</td></tr>
+            <tr><td><strong>风险预警系统</strong></td><td><span class="badge badge-yellow">★★★☆☆ 中等</span></td><td>100+风险点位规则库建设复杂度中等，核心在于规则准确性调优与误报率控制</td></tr>
+            <tr><td><strong>AI智能体集成</strong></td><td><span class="badge badge-red">★★★★☆ 较高</span></td><td>需对接大模型平台，核心难点在于Agent技能封装与数据安全隔离</td></tr>
+            <tr><td><strong>整体系统集成</strong></td><td><span class="badge badge-red">★★★★☆ 较高</span></td><td>7大环节联动、多端协同，需确保大并发环境下系统稳定性与数据一致性</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- ===== 第38页：税务相关准备工作-总览 ===== -->
+      <div class="slide">
+        <div class="slide-title">税务相关准备工作 · 总览</div>
+        <div class="slide-subtitle">四大维度：业务规则、多租户设计、技术对接、合规安全</div>
+        <div class="grid-2">
+          <div class="card">
+            <div class="badge badge-red">业务层面准备</div>
+            <p style="margin-top:8px; font-size:13px; line-height:1.6;">梳理客户业态（小规模/一般纳税人/个体户/建筑/商贸/服务），统一会计科目体系、做账规则、结转规则、报税周期，准备各行业默认会计科目与常见票据对应凭证规则。</p>
+          </div>
+          <div class="card">
+            <div class="badge badge-blue">多租户与版本</div>
+            <p style="margin-top:8px; font-size:13px; line-height:1.6;">必须做多租户隔离：每个客户独立账套、数据隔离、权限隔离。确定版本：基础版/标准版/一般纳税人版/建安专项版，后续做套餐收费。</p>
+          </div>
+          <div class="card">
+            <div class="badge badge-yellow">技术对接准备</div>
+            <p style="margin-top:8px; font-size:13px; line-height:1.6;">OCR厂商对接（接口/调用量/单价/并发）、电子税局调研（申报接口/格式/模板，先半自动后全自动）、发票与银行回单对接。</p>
+          </div>
+          <div class="card">
+            <div class="badge badge-pink">合规与安全</div>
+            <p style="margin-top:8px; font-size:13px; line-height:1.6;">财税数据加密、传输HTTPS、权限分级、禁止越权看其他客户账套。后期可做等保三级，前期先把日志、权限、数据隔离做扎实。</p>
+          </div>
+        </div>
+        <div class="highlight-box">最关键原则：先定规则再开发。没有会计规则，开发出来也用不了。</div>
+      </div>
+
+      <!-- ===== 第39页：税务准备-业务层面 ===== -->
+      <div class="slide">
+        <div class="slide-title">税务准备 · 业务层面</div>
+        <div class="slide-subtitle">最关键：先定规则再开发</div>
+        <div class="grid-2">
+          <div class="card">
+            <div class="badge badge-red">梳理现有客户业态</div>
+            <ul class="list">
+              <li>客户类型：小规模、一般纳税人、个体户</li>
+              <li>行业分类：建筑、商贸、服务等</li>
+              <li>现有做账流程：会计手工怎么做、凭证怎么做、报税怎么报</li>
+            </ul>
+          </div>
+          <div class="card">
+            <div class="badge badge-blue">统一标准模板</div>
+            <ul class="list">
+              <li>统一会计科目体系</li>
+              <li>统一做账规则、结转规则</li>
+              <li>统一报税周期</li>
+              <li>做成标准模板供系统调用</li>
+            </ul>
+          </div>
+          <div class="card">
+            <div class="badge badge-yellow">多租户隔离</div>
+            <ul class="list">
+              <li>每个客户独立账套</li>
+              <li>数据隔离、权限隔离</li>
+              <li>确定版本：基础版/标准版/一般纳税人版/建安专项版</li>
+              <li>后续做套餐收费</li>
+            </ul>
+          </div>
+          <div class="card">
+            <div class="badge badge-pink">财税专家规则库</div>
+            <ul class="list">
+              <li>各行业默认会计科目</li>
+              <li>常见票据对应凭证规则（发票、费用、工资、银行回单）</li>
+              <li>税负率预警阈值</li>
+              <li>进销项匹配规则、费用异常规则</li>
+            </ul>
+          </div>
+        </div>
+        <div class="speech-bubble" style="background:var(--pink); color:white;">
+          这套规则库是系统灵魂，没有会计规则，开发出来也用不了。
+        </div>
+      </div>
+
+      <!-- ===== 第40页：税务准备-技术对接 ===== -->
+      <div class="slide">
+        <div class="slide-title">税务准备 · 技术对接</div>
+        <div class="slide-subtitle">开发前就要敲定的第三方资源</div>
+        <div class="grid-2">
+          <div class="card">
+            <div class="badge badge-red">OCR票据识别</div>
+            <p style="margin-top:8px; font-size:13px; line-height:1.6;">二选一：自研模型或接入成熟厂商（发票、回单、营业执照OCR）。提前谈好接口、调用量、单价、并发限制。</p>
+          </div>
+          <div class="card">
+            <div class="badge badge-blue">发票与电子票据</div>
+            <p style="margin-top:8px; font-size:13px; line-height:1.6;">全电发票、增值税发票查验、自动拉取发票渠道。银行回单对接：主流银行流水/回单获取方式（接口或标准导入模板）。</p>
+          </div>
+          <div class="card">
+            <div class="badge badge-yellow">税务申报渠道</div>
+            <p style="margin-top:8px; font-size:13px; line-height:1.6;">提前调研所在省份电子税局申报接口、申报格式、申报表模板。先做半自动→再做全自动，降低初期开发难度。</p>
+          </div>
+          <div class="card">
+            <div class="badge badge-pink">存储与短信与支付</div>
+            <p style="margin-top:8px; font-size:13px; line-height:1.6;">对象存储：存发票PDF、凭证图片、报表文件。短信接口：验证码、通知。支付接口：后期套餐续费、增值服务付费（可后期再加）。</p>
+          </div>
+        </div>
+        <div class="grid-2">
+          <div class="card">
+            <div class="badge badge-orange">技术栈统一</div>
+            <p style="margin-top:8px; font-size:13px; line-height:1.6;">前后端框架、代码规范、接口文档规范、数据库设计规范，全员统一。</p>
+          </div>
+          <div class="card">
+            <div class="badge badge-red">多租户底层设计</div>
+            <p style="margin-top:8px; font-size:13px; line-height:1.6;">提前定：共享库共享表、按租户ID隔离，不要后期再改，重构成本极高。</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== 第41页：税务准备-合规安全 ===== -->
+      <div class="slide">
+        <div class="slide-title">税务准备 · 合规与安全</div>
+        <div class="grid-2">
+          <div class="card">
+            <div class="badge badge-red">数据安全</div>
+            <ul class="list">
+              <li>财税数据加密存储与传输（HTTPS）</li>
+              <li>权限分级管理，禁止越权查看其他客户账套</li>
+              <li>操作日志、做账日志、修改留痕（财税必须可追溯）</li>
+            </ul>
+          </div>
+          <div class="card">
+            <div class="badge badge-blue">等保与隐私</div>
+            <ul class="list">
+              <li>后期可做等保三级认证</li>
+              <li>前期先把日志、权限、数据隔离做扎实</li>
+              <li>满足审计追溯需求</li>
+            </ul>
+          </div>
+          <div class="card">
+            <div class="badge badge-yellow">运维监控</div>
+            <ul class="list">
+              <li>服务器监控、接口监控</li>
+              <li>报错告警、做账任务队列监控</li>
+              <li>防止批量做账卡死</li>
+            </ul>
+          </div>
+          <div class="card">
+            <div class="badge badge-pink">消息通知</div>
+            <ul class="list">
+              <li>短信/企微/公众号报税提醒</li>
+              <li>逾期提醒、风险预警推送</li>
+              <li>站内消息、邮件、短信多通道</li>
+            </ul>
+          </div>
+        </div>
+        <div class="highlight-box">后期可做等保三级，前期先把日志、权限、数据隔离做扎实。</div>
+      </div>
+
+      <!-- ===== 第42页：进一步沟通事项 ===== -->
+      <div class="slide">
+        <div class="slide-title">进一步沟通事项</div>
+        <div class="grid-2">
+          <div class="card"><div class="badge badge-red">1. 用户规模</div><p style="font-size:12px; margin-top:6px; line-height:1.5;">当前客户总量及月均增长量？会计团队规模及岗位分工？预测系统上线后并发访问峰值？</p></div>
+          <div class="card"><div class="badge badge-blue">2. 承兑票据需求</div><p style="font-size:12px; margin-top:6px; line-height:1.5;">承兑票据主要来源（银承/商承）及月处理量级？纸质承兑占比？未来电子承兑比例预期？</p></div>
+          <div class="card"><div class="badge badge-yellow">3. 成本核算规则</div><p style="font-size:12px; margin-top:6px; line-height:1.5;">生产制造企业主要涵盖哪些行业？现有成本核算SOP和常用分摊方法？</p></div>
+          <div class="card"><div class="badge badge-pink">4. 税务申报范围</div><p style="font-size:12px; margin-top:6px; line-height:1.5;">客户分布在哪些省/市？是否需要支持跨省多地区一键申报？</p></div>
+          <div class="card"><div class="badge badge-orange">5. IT基础与集成</div><p style="font-size:12px; margin-top:6px; line-height:1.5;">现有财税系统是什么？是否有API？是否已使用企微/钉钉/飞书？</p></div>
+          <div class="card"><div class="badge badge-red">6. AI智能体部署</div><p style="font-size:12px; margin-top:6px; line-height:1.5;">倾向哪家大模型平台？AI辅助范围需求？</p></div>
+          <div class="card"><div class="badge badge-blue">7. 实施节奏与预算</div><p style="font-size:12px; margin-top:6px; line-height:1.5;">期望建设周期？预算范围？建议分三阶段实施。</p></div>
+          <div class="card"><div class="badge badge-yellow">8. 数据迁移</div><p style="font-size:12px; margin-top:6px; line-height:1.5;">历史账套数据量级及格式？是否需全量迁移？迁移时间窗口？</p></div>
+        </div>
+      </div>
+
+      <!-- ===== 第43页：下一步准备工作 ===== -->
+      <div class="slide">
+        <div class="slide-title">下一步准备工作</div>
+        <div class="flowchart">
+          <div class="flow-row">
+            <div class="flow-node flow-start">Step 1<br>确认业务规则</div>
+            <div class="flow-arrow">→</div>
+            <div class="flow-node flow-action">Step 2<br>定多租户模式</div>
+            <div class="flow-arrow">→</div>
+            <div class="flow-node flow-action">Step 3<br>梳理全流程闭环</div>
+            <div class="flow-arrow">→</div>
+            <div class="flow-node flow-action">Step 4<br>准备规则库</div>
+          </div>
+          <div class="flow-row" style="margin-top:10px;">
+            <div class="flow-node flow-decision">Step 5<br>确定技术架构</div>
+            <div class="flow-arrow">→</div>
+            <div class="flow-node flow-action">Step 6<br>敲定第三方资源</div>
+            <div class="flow-arrow">→</div>
+            <div class="flow-node flow-action">Step 7<br>MVP开发</div>
+            <div class="flow-arrow">→</div>
+            <div class="flow-node flow-end">Step 8<br>试点上线</div>
+          </div>
+        </div>
+        <div class="grid-2" style="margin-top:12px;">
+          <div class="card">
+            <div class="badge badge-red">关键前置任务</div>
+            <ul class="list">
+              <li><strong>业务规则确认</strong>：会计科目体系、做账规则、结转规则、报税周期标准化</li>
+              <li><strong>多租户版本定义</strong>：基础版/标准版/一般纳税人版/建安专项版功能边界</li>
+              <li><strong>流程闭环固化</strong>：票据收集→识别→生成凭证→审核→结账→财报→报税→风控→年报</li>
+            </ul>
+          </div>
+          <div class="card">
+            <div class="badge badge-blue">技术与资源准备</div>
+            <ul class="list">
+              <li><strong>OCR厂商对接</strong>：谈好接口、调用量、单价、并发限制</li>
+              <li><strong>电子税局调研</strong>：申报接口、格式、模板，先半自动后全自动</li>
+              <li><strong>多租户底层设计</strong>：共享库共享表、按租户ID隔离，提前定好</li>
+            </ul>
+          </div>
+          <div class="card">
+            <div class="badge badge-yellow">团队与数据</div>
+            <ul class="list">
+              <li><strong>固定业务财税负责人</strong>：给开发定做账规则、凭证规则、报税逻辑</li>
+              <li><strong>专职分工</strong>：产品/后端/前端/测试明确职责</li>
+              <li><strong>存量数据迁移</strong>：旧账、期初余额、科目余额标准导入模板</li>
+            </ul>
+          </div>
+          <div class="card">
+            <div class="badge badge-pink">实施节奏建议</div>
+            <ul class="list">
+              <li><strong>第一阶段</strong>：收资料 + 账务处理 + 税务申报（核心MVP）</li>
+              <li><strong>第二阶段</strong>：凭证管理 + 经营分析报告</li>
+              <li><strong>第三阶段</strong>：AI智能体 + 风控深化</li>
+            </ul>
+          </div>
+        </div>
+        <div class="highlight-box">建议先做最小可用版本MVP：跑通"传票→识别→生成凭证→财报→申报"，再迭代增值功能。</div>
       </div>
     </div>
+
+    <div id="bottomBar">
+      <button class="navBtn" id="prevBtn" onclick="goTo(current-1)">← 上一页</button>
+      <button class="navBtn" id="nextBtn" onclick="goTo(current+1)">下一页 →</button>
+    </div>
   </div>
+</div>
 
-  <script>
-    (function() {
-      const slides = document.querySelectorAll('.slide');
-      const navItems = document.querySelectorAll('.nav-item');
-      const prevBtn = document.getElementById('prevBtn');
-      const nextBtn = document.getElementById('nextBtn');
-      const slideInfo = document.getElementById('slideInfo');
-      const progressFill = document.getElementById('progressFill');
-      const menuBtn = document.getElementById('menuBtn');
-      const sidebar = document.getElementById('sidebar');
+<script>
+  const slides = document.querySelectorAll('.slide');
+  const navItems = document.querySelectorAll('.nav-item');
+  const progressFill = document.getElementById('progressFill');
+  const counter = document.getElementById('slideCounter');
+  const total = slides.length;
+  let current = 0;
 
-      let current = 0;
-      const total = slides.length;
+  const groups = {};
+  document.querySelectorAll('.nav-item.has-children').forEach(el => {
+    const g = el.dataset.group;
+    if (g) groups[g] = false;
+  });
 
-      function updateSlide(index) {
-        slides.forEach((s, i) => {
-          s.classList.toggle('active', i === index);
-        });
-        navItems.forEach((n, i) => {
-          n.classList.toggle('active', parseInt(n.dataset.slide) === index);
-        });
-        prevBtn.disabled = index === 0;
-        nextBtn.disabled = index === total - 1;
-        slideInfo.textContent = (index + 1) + ' / ' + total;
-        progressFill.style.width = ((index + 1) / total * 100) + '%';
+  function toggleGroup(g) {
+    groups[g] = !groups[g];
+    document.querySelectorAll('.nav-item.sub[data-group="' + g + '"]').forEach(el => {
+      el.classList.toggle('visible', groups[g]);
+    });
+    const parent = document.querySelector('.nav-item.has-children[data-group="' + g + '"]').querySelector('.nav-toggle');
+    parent.textContent = groups[g] ? '▲' : '▼';
+  }
 
-        // Expand parent group if current slide is in a group
-        document.querySelectorAll('.nav-group').forEach(group => {
-          const items = group.querySelectorAll('.nav-item');
-          let shouldExpand = false;
-          items.forEach(item => {
-            if (parseInt(item.dataset.slide) === index) {
-              shouldExpand = true;
-            }
-          });
-          if (shouldExpand) {
-            group.classList.add('expanded');
-          }
-        });
+  document.querySelectorAll('.nav-item.has-children').forEach(el => {
+    el.addEventListener('click', (e) => {
+      e.preventDefault();
+      toggleGroup(el.dataset.group);
+    });
+  });
 
-        // Scroll active nav item into view
-        const activeNav = document.querySelector('.nav-item.active');
-        if (activeNav) {
-          activeNav.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-        }
-      }
+  function goTo(idx) {
+    if (idx < 0 || idx >= total) return;
+    slides[current].classList.remove('active');
+    navItems.forEach(n => n.classList.remove('active'));
+    current = idx;
+    slides[current].classList.add('active');
+    navItems.forEach(n => {
+      if (n.dataset.idx == current) n.classList.add('active');
+    });
+    progressFill.style.width = ((current + 1) / total * 100) + '%';
+    counter.textContent = (current + 1) + ' / ' + total;
+    document.getElementById('prevBtn').disabled = current === 0;
+    document.getElementById('nextBtn').disabled = current === total - 1;
+  }
 
-      function goTo(index) {
-        if (index < 0 || index >= total) return;
-        current = index;
-        updateSlide(current);
-      }
+  navItems.forEach((item) => {
+    if (!item.classList.contains('has-children')) {
+      item.addEventListener('click', () => goTo(parseInt(item.dataset.idx)));
+    }
+  });
 
-      prevBtn.addEventListener('click', () => goTo(current - 1));
-      nextBtn.addEventListener('click', () => goTo(current + 1));
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowRight' || e.key === ' ') goTo(current + 1);
+    if (e.key === 'ArrowLeft') goTo(current - 1);
+    if (e.key === 'Home') goTo(0);
+    if (e.key === 'End') goTo(total - 1);
+  });
 
-      navItems.forEach(item => {
-        item.addEventListener('click', (e) => {
-          e.preventDefault();
-          goTo(parseInt(item.dataset.slide));
-        });
-      });
+  let touchStartX = 0;
+  document.addEventListener('touchstart', e => { touchStartX = e.changedTouches[0].screenX; });
+  document.addEventListener('touchend', e => {
+    const dx = e.changedTouches[0].screenX - touchStartX;
+    if (dx < -40) goTo(current + 1);
+    if (dx > 40) goTo(current - 1);
+  });
 
-      // Toggle expand on parent click
-      document.querySelectorAll('.nav-item.has-children').forEach(item => {
-        item.addEventListener('click', (e) => {
-          if (e.target.classList.contains('nav-toggle')) {
-            e.preventDefault();
-            e.stopPropagation();
-            const group = item.closest('.nav-group');
-            group.classList.toggle('expanded');
-            return;
-          }
-          // Also toggle expand when clicking the parent item itself
-          const group = item.closest('.nav-group');
-          group.classList.toggle('expanded');
-        });
-      });
+  const menuBtn = document.getElementById('menuBtn');
+  const sidebar = document.getElementById('sidebar');
+  menuBtn.addEventListener('click', () => {
+    sidebar.classList.toggle('collapsed');
+  });
 
-      // Toggle expand on toggle button click
-      document.querySelectorAll('.nav-toggle').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          const group = btn.closest('.nav-group');
-          group.classList.toggle('expanded');
-        });
-      });
-
-      document.addEventListener('keydown', (e) => {
-        if (e.key === 'ArrowLeft') goTo(current - 1);
-        if (e.key === 'ArrowRight') goTo(current + 1);
-        if (e.key === 'Home') goTo(0);
-        if (e.key === 'End') goTo(total - 1);
-      });
-
-      // Touch swipe
-      let touchStartX = 0;
-      let touchEndX = 0;
-      const container = document.getElementById('slideContainer');
-
-      container.addEventListener('touchstart', (e) => {
-        touchStartX = e.changedTouches[0].screenX;
-      }, { passive: true });
-
-      container.addEventListener('touchend', (e) => {
-        touchEndX = e.changedTouches[0].screenX;
-        const diff = touchStartX - touchEndX;
-        if (Math.abs(diff) > 50) {
-          if (diff > 0) goTo(current + 1);
-          else goTo(current - 1);
-        }
-      }, { passive: true });
-
-      // Menu toggle
-      menuBtn.addEventListener('click', () => {
-        sidebar.classList.toggle('hidden');
-      });
-
-      // Hide sidebar on mobile by default
-      if (window.innerWidth <= 900) {
-        sidebar.classList.add('hidden');
-      }
-
-      updateSlide(0);
-    })();
-  </script>
+  goTo(0);
+</script>
 </body>
 </html>
