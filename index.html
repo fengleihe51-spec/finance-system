@@ -1299,32 +1299,48 @@
       <!-- ===== 第29页：系统架构-功能清单 ===== -->
       <div class="slide">
         <div class="slide-title">系统架构 · 功能清单</div>
-        <div class="slide-subtitle">10大模块，40+功能点</div>
-        <div style="display:flex; flex-wrap:wrap; gap:6px; margin-bottom:12px;">
-          <span class="badge badge-blue">票据管理（4项）</span>
-          <span class="badge badge-red">智能核算（5项）</span>
-          <span class="badge badge-yellow">数电发票（3项）</span>
-          <span class="badge badge-pink">税务申报（5项）</span>
-          <span class="badge badge-orange">凭证账簿（4项）</span>
-          <span class="badge badge-blue">经营分析（4项）</span>
-          <span class="badge badge-red">风险预警（4项）</span>
-          <span class="badge badge-yellow">AI智能体（4项）</span>
-          <span class="badge badge-pink">客户管理（3项）</span>
-          <span class="badge badge-orange">系统管理（2项）</span>
-        </div>
-        <table class="data-table" style="font-size:12px;">
-          <thead><tr><th>一级菜单</th><th>二级菜单</th><th>核心操作</th></tr></thead>
+        <div class="slide-subtitle">10大模块，40+功能点，覆盖业财税全流程</div>
+        <table class="data-table" style="font-size:11px;">
+          <thead><tr><th style="width:6%;">序号</th><th style="width:12%;">一级菜单</th><th style="width:13%;">二级菜单</th><th style="width:12%;">功能</th><th>功能描述与操作颗粒度</th></tr></thead>
           <tbody>
-            <tr><td rowspan="4">票据管理</td><td>票据采集</td><td>OCR扫描→识别→录入→详情→编辑确认</td></tr>
-            <tr><td>承兑票据处理</td><td>上传扫描件→OCR提取→录入→同步票据库</td></tr>
-            <tr><td>银行回单采集</td><td>账户授权→RPA查询→自动录入→编辑确认</td></tr>
-            <tr><td>票据台账</td><td>查询→详情→批量导出/删除</td></tr>
-            <tr><td rowspan="3">智能核算</td><td>自动记账</td><td>规则模板新增/编辑→执行→详情→审核</td></tr>
-            <tr><td>AI成本结转</td><td>分摊规则→存货台账→成本结转凭证</td></tr>
-            <tr><td>科目辅助</td><td>智能推荐→审核选择→新增/编辑映射</td></tr>
-            <tr><td rowspan="2">税务申报</td><td>一键申报</td><td>查询→预览→提交→查询结果</td></tr>
-            <tr><td>批量申报</td><td>批量勾选→创建任务→无人值守执行</td></tr>
-            <tr><td>AI智能体</td><td>快捷任务</td><td>自然语言指令→社保查询/发票查验/批量报税RPA</td></tr>
+            <tr><td><strong>1</strong></td><td rowspan="4">票据管理</td><td>票据采集</td><td>OCR智能识别扫描</td><td>扫描/拍照上传→系统自动识别关键信息（发票代码/号码/金额/税额/购销方）→录入→详情展示→人工编辑确认</td></tr>
+            <tr><td></td><td>承兑票据处理</td><td>承兑票据电子化录入</td><td>上传承兑票据扫描件→OCR提取关键字段（出票人/收款人/金额/到期日）→录入→自动同步至票据库</td></tr>
+            <tr><td></td><td>银行回单采集</td><td>银行流水对接</td><td>银行账户授权→系统自动抽取流水→关联业务类型智能入账。操作：RPA查询→自动录入→人工编辑确认</td></tr>
+            <tr><td></td><td>票据台账</td><td>票据管理</td><td>查询列表（按客户/时间/票据类型筛选），查看单张详情，支持批量导出与删除</td></tr>
+            <tr><td><strong>2</strong></td><td rowspan="5">智能核算</td><td>自动记账</td><td>凭证规则引擎</td><td>设置规则模板（新增/编辑）→系统自动执行→详情查看凭证生成结果→人工审核确认</td></tr>
+            <tr><td></td><td>AI成本结转</td><td>成本智能核算</td><td>原材料/人工/制造费用自动分摊→自动生成存货台账（新增/编辑规则）→自动生成成本结转凭证</td></tr>
+            <tr><td></td><td>会计科目辅助</td><td>科目智能推荐</td><td>基于行业特性与业务类型自动推荐科目→人工审核选择→支持手动新增/编辑科目映射规则</td></tr>
+            <tr><td></td><td>结账检查</td><td>智能结账核查</td><td>执行账务完整性/余额异常/往来账龄/业务关联性/关键指标检查，查看检查报告详情→问题项标注→人工处理闭环</td></tr>
+            <tr><td></td><td>账簿报表明细</td><td>财务账簿</td><td>查询查看凭证列表/明细账/总账/科目余额表/财务报表→详情展示→支持导出与打印</td></tr>
+            <tr><td><strong>3</strong></td><td rowspan="3">数电发票</td><td>开票管理</td><td>智能开票</td><td>录入开票信息（客户/商品/金额）→智能赋码→详情预览→确认提交开票→支持编辑开票参数</td></tr>
+            <tr><td></td><td>发票台账</td><td>发票综合管理</td><td>查询进项/销项/异常发票清单→查看单张详情→导入外部发票数据→导出报表</td></tr>
+            <tr><td></td><td>合规检查</td><td>开票合规预判</td><td>系统自动进行进销项差异分析→查询查看合规性分析结果→发现异常发票自动标红预警</td></tr>
+            <tr><td><strong>4</strong></td><td rowspan="5">税务申报</td><td>一键申报</td><td>全税种申报</td><td>查询待申报企业列表→选择目标→系统自动获取税种税率核定信息→详情预览→提交一键申报→查询结果反馈</td></tr>
+            <tr><td></td><td>批量申报</td><td>多企业批量申报</td><td>查询待申报列表→批量勾选→创建批量申报任务→无人值守自动化执行→查询申报结果列表</td></tr>
+            <tr><td></td><td>申报前审核</td><td>智能审核校验</td><td>申报自动触发表单检查/表间关系校验/费用率毛利率税负率分析→产生异常提醒→详情查看审核结果→人工修正</td></tr>
+            <tr><td></td><td>汇算清缴</td><td>自动化汇算清缴</td><td>系统自动填写基础信息和表单→新增申报数据→详情预览→支持编辑调整→确认申报</td></tr>
+            <tr><td></td><td>申报台账</td><td>申报历史与状态</td><td>查询所有申报任务历史列表→查看单次详情（企业/税种/金额/状态/时间）→系统自动更新申报状态及异常预警</td></tr>
+            <tr><td><strong>5</strong></td><td rowspan="4">凭证账簿</td><td>电子凭证</td><td>电子凭证生成</td><td>系统自动生成记账凭证→查询电子凭证列表→详情查看→支持编辑调整（科目/金额/摘要）→导出与打印</td></tr>
+            <tr><td></td><td>凭证装订</td><td>批量打印管理</td><td>支持多客户/多凭证一键批量打印预设任务→预览打印详情→编辑打印参数→执行批量打印</td></tr>
+            <tr><td></td><td>电子归档</td><td>凭证与账簿归档</td><td>电子凭证/账簿/报表自动归档存储→查询归档文件→详情在线预览→下载PDF</td></tr>
+            <tr><td></td><td>账簿打印</td><td>账簿及报表打印</td><td>支持打印明细账/总账/科目余额表/财务报表→设置打印参数（编辑）→执行打印</td></tr>
+            <tr><td><strong>6</strong></td><td rowspan="4">经营分析</td><td>标准报告生成</td><td>多维度数据抽取</td><td>系统自动生成营收趋势/成本结构/现金流/税负分析等多维度可视化报表→生成报告初稿→人工编辑优化→详情预览</td></tr>
+            <tr><td></td><td>定制化配置</td><td>一户一策</td><td>针对企业行业特征/收入规模/发展阶段设置专属分析维度（新增/编辑规则）→系统按预设维度生成报告→企业端查询查看</td></tr>
+            <tr><td></td><td>报告管理</td><td>报告查询与导出</td><td>查询企业历史报告列表→详情在线查看→下载PDF/Excel→支持删除旧版报告</td></tr>
+            <tr><td></td><td>核心指标看板</td><td>可视化经营仪表盘</td><td>实时展示应收账款周转率/销售毛利率/税负率等重要指标趋势图表→支持日期范围查询→导出图表数据</td></tr>
+            <tr><td><strong>7</strong></td><td rowspan="4">风险预警</td><td>风险点位配置</td><td>预警规则预设</td><td>新增/编辑风险监测规则（税负率异常/成本波动/现金红字等100+点位可配置），设置预警阈值，详情查看规则</td></tr>
+            <tr><td></td><td>实时监测</td><td>7×24h风险扫描</td><td>系统自动运行风险扫描任务→查询企业风险状态（绿色安全/黄色提示/红色预警）→自动推送预警消息</td></tr>
+            <tr><td></td><td>异常分析提示</td><td>异常详情</td><td>查询风险异常案例列表→详情查看异常数据及分析说明→导出风险报告→人工跟进处理闭环</td></tr>
+            <tr><td></td><td>知识图谱</td><td>政策库与法规解析</td><td>实时同步最新财税法规→查询政策内容→自动匹配行业资质标准→详情展示适配分析结果</td></tr>
+            <tr><td><strong>8</strong></td><td rowspan="4">AI智能体</td><td>企微集成</td><td>企业微信侧边栏</td><td>会计登录企业微信→AI智能体自动嵌入侧边栏→支持自然语言输入任务→系统自动执行并返回结果</td></tr>
+            <tr><td></td><td>快捷任务</td><td>一键批量操作</td><td>通过自然语言指令触发：社保查询/发票查验/账务编辑调整/批量报税RPA/税务报表生成。批量勾选企业→AI驱动RPA自动完成流程</td></tr>
+            <tr><td></td><td>Token管理</td><td>使用情况监测</td><td>查询Token消耗明细报表，支持分企业/分人员/分日期维度统计，详情展示消耗来源，支持成本分析</td></tr>
+            <tr><td></td><td>任务调度</td><td>定时与批量任务管理</td><td>新增定时执行任务（批量报税/批量生成报告等）→查询任务执行状态→详情查看执行结果</td></tr>
+            <tr><td><strong>9</strong></td><td rowspan="3">客户管理</td><td>客户档案</td><td>基本信息维护</td><td>新增企业客户信息（新增增量客户）→查询客户列表→详情查看客户完整资料→编辑更新信息</td></tr>
+            <tr><td></td><td>服务状态跟踪</td><td>进度管理</td><td>查询客户各环节的作业进度（资料归集/账务处理/凭证生成/税务申报）→详情看板展示明细→在线同步客户</td></tr>
+            <tr><td></td><td>工单管理</td><td>任务工单分配</td><td>新增服务工单→指派负责人→查询处理状态→详情查看工单处理记录→工单结单</td></tr>
+            <tr><td><strong>10</strong></td><td rowspan="2">系统管理</td><td>角色权限</td><td>用户管理</td><td>新增用户→分配系统角色→编辑权限配置→查询用户列表→详情查看用户权限</td></tr>
+            <tr><td></td><td>数据安全</td><td>日志与审计</td><td>查询操作日志→详情查看操作记录→数据备份与加密检查→导出审计追溯报告</td></tr>
           </tbody>
         </table>
       </div>
